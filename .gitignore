@@ -1,0 +1,12 @@
+.*/
+*-*/
+pack
+build
+*.tgz
+*.part
+*.tar.gz
+*.tar.xz
+*.tar.bz2
+
+/boot/
+/linux/

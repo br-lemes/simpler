@@ -1,0 +1,5 @@
+#!/bin/sh
+
+[ -z "$EDITOR" ] && EDITOR=/usr/bin/e3ne
+
+[ -x "$EDITOR" ] && "$EDITOR" "$@"

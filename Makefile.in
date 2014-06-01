@@ -1,0 +1,132 @@
+# Makefile to be included by package's makefile
+#
+# This file includes the rules for download, extract and patch tarballs.
+# There is also rules to generate the packages, clean up the build files,
+# give information and so on.
+#
+# Your makefile must define some variables and include this file. Then
+# define the rules for building and package preparation. See the packages
+# zlib, rsync and dropbear for examples.
+
+default: all
+
+FLOAT=hard
+FPU=vfp
+HOST=$(shell $(CC) -dumpmachine)
+TARGET=arm-linux-musleabihf
+ARCH=arm
+ARM_ARCH=armv6zk
+LRPKG=pack/var/lib/lrpkg
+
+# often used workaround to recognize musl triple
+SEDMUSL=sed -i -e 's/linux-newlib/linux-musl/'
+
+export LC_ALL=POSIX
+export CFLAGS=
+export CXXFLAGS=
+
+export CC=$(TARGET)-gcc
+export CXX=$(TARGET)-g++
+export AR=$(TARGET)-ar
+export AS=$(TARGET)-as
+export LD=$(TARGET)-ld
+export RANLIB=$(TARGET)-ranlib
+export READELF=$(TARGET)-readelf
+export STRIP=$(TARGET)-strip --strip-unneeded
+
+ifdef PKGNAME
+
+# default PKGPATH
+ifndef PKGPATH
+ifdef PKGVERSION
+PKGPATH=$(PKGNAME)-$(PKGVERSION)
+endif
+endif
+
+# default PKGFILE
+ifndef PKGFILE
+ifdef PKGPATH
+ifdef PKGFEXT
+PKGFILE=$(PKGPATH).tar.$(PKGFEXT)
+endif
+endif
+endif
+
+endif
+
+# performs checksum verification in a tarball
+md5sum:
+ifdef PKGMD5SUM
+ifdef PKGFILE
+	@echo "$(PKGMD5SUM)  $(PKGFILE)" | md5sum -c
+endif
+endif
+
+# shows package name and brief description
+show:
+ifdef PKGNAME
+ifdef PKGDESC
+	@printf "  %-20s%s\n" "$(PKGNAME)" "$(PKGDESC)"
+endif
+endif
+
+# shows package version and download site
+version:
+ifdef PKGNAME
+ifdef PKGVERSION
+	@printf "  %-20s%s\n" "$(PKGNAME)-$(PKGVERSION)" "$(PKGSITE)"
+endif
+endif
+
+# cleans generated or temporary files
+clean:
+	@echo $(RM) -r $(PKGCLEAN) $(PKGNAME).tgz *.part pack
+	@$(RM) -r $(PKGCLEAN) $(PKGNAME).tgz *.part pack
+
+# cleans build files
+binclean: clean
+	@echo $(RM) -r $(PKGBCLEAN) $(PKGPATH)
+	@$(RM) -r $(PKGBCLEAN) $(PKGPATH)
+
+# cleans downloaded files
+downclean: binclean
+	@echo $(RM) -r $(PKGDCLEAN) $(PKGFILE)
+	@$(RM) -r $(PKGDCLEAN) $(PKGFILE)
+
+ifdef PKGNAME
+
+# hadlinks packages to the boot subdirectory
+PKGBOOT=../../../boot/packages/$(PKGNAME).tgz
+../../../boot/packages:
+	@mkdir -p $@
+$(PKGBOOT): $(PKGNAME).tgz ../../../boot/packages
+	@ln -f $< $@
+
+# generates a package with version and list info
+$(PKGNAME).tgz: $(PKGBUILD)
+	@$(MAKE) pack
+	@mkdir -p $(LRPKG)
+	@echo "VERSION=$(PKGVERSION)" > $(LRPKG)/$(PKGNAME).version
+	@echo "BUILD=$(shell date +%F-%Z)" >> $(LRPKG)/$(PKGNAME).version
+	@touch $(LRPKG)/$(PKGNAME).list
+	@find pack/ -type f -o -type l | sed 's,pack/,,' > $(LRPKG)/$(PKGNAME).list
+	@tar czf $@ -C pack --owner=root --group=root -T $(LRPKG)/$(PKGNAME).list
+endif
+
+# extracts a tarball and apply a patch if any
+ifdef PKGFILE
+$(PKGPATH): $(PKGFILE)
+	@tar xvf $<
+ifdef PKGPATCH
+	@cd $@ && patch -Np1 -i ../$(PKGPATCH)
+endif
+	@touch $@
+
+# downloads a tarball
+$(PKGFILE):
+	@wget -c $(PKGDOWN)$@ -O $(PKGPATH).part
+	@mv $(PKGPATH).part $@
+	@echo "$(PKGMD5SUM)  $@" | md5sum -c || $(RM) $@
+endif
+
+.PHONY: all default show version clean binclean downclean pack md5sum

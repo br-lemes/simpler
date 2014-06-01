@@ -1,0 +1,66 @@
+#!/bin/sh
+#
+# Dropbear init script
+#
+# Config from master.cfg
+# Default DROPBEAR_PORT=22
+# Default DROPBEAR_ENABLED=YES
+# Disable if OPENSSH_ENABLED=YES
+
+. /etc/config/master.cfg
+. /lib/libscript
+
+case "$DROPBEAR_ENABLED" in
+	[Nn]|[Nn][Oo]) DROPBEAR_ENABLED=NO;;
+	*) DROPBEAR_ENABLED=YES
+esac
+case "$OPENSSH_ENABLED" in
+	[Yy]|[Yy][Ee][Ss]) OPENSSH_ENABLED=YES;;
+	*) OPENSSH_ENABLED=NO
+esac
+[ "$OPENSSH_ENABLED" = "YES" ] && DROPBEAR_ENABLED=NO
+[ -z "$DROPBEAR_PORT" ] && DROPBEAR_PORT=22
+PID=/var/run/dropbear.pid
+
+checkcfgdir dropbear
+find /etc/config/dropbear -type f -exec chmod 600 {} \;
+[ ! -L /etc/dropbear ] && ln -s /etc/config/dropbear /etc/dropbear
+
+start() {
+	if [ -f "$PID" ]; then
+		echo "The dropbear service is already running." >&2
+		exit 1
+	fi
+	if [ "$DROPBEAR_ENABLED" = "NO" ]; then
+		echo "The dropbear service is disabled." >&2
+		exit 1
+	fi
+	logstart "Starting dropbear service"
+	dropbear -R -p "$DROPBEAR_PORT" 2>> "$LOGSTDERR"
+	logstatus
+}
+
+stop() {
+	if [ -f "$PID" ]; then
+		kill $(cat "$PID")
+	else
+		echo "The dropbear service isn't running." >&2
+		exit 1
+	fi
+}
+
+status() {
+	if [ -f "$PID" ]; then
+		echo -e "dropbear\tYES"
+	else
+		if [ "$DROPBEAR_ENABLED" = "NO" ]; then
+			echo -e "dropbear\tDISABLED"
+			exit 1
+		else
+			echo -e "dropbear\tNO"
+			exit 1
+		fi
+	fi
+}
+
+srvargs "$@"

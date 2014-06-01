@@ -1,0 +1,9 @@
+#!/bin/sh
+
+. /lib/libscript
+
+start() {
+	service dropbear start 2>> "$LOGSTDERR"
+}
+
+pkgargs "$@"

@@ -1,0 +1,235 @@
+#!/bin/busybox sh
+#
+# system init script
+#
+# Config from master.cfg
+# Default PKGMODE=NO
+# Default HOSTNAME=simpler
+
+# TODO: list the availabe options
+
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# make sure that needed files and directories exists
+busybox mkdir -p \
+	/bin     \
+	/boot    \
+	/dev/pts \
+	/etc/opt \
+	/lib     \
+	/media   \
+	/mnt     \
+	/opt     \
+	/proc    \
+	/sbin    \
+	/srv     \
+	/sys     \
+	/usr/bin /usr/include /usr/lib /usr/sbin \
+	/usr/share/man /usr/share/misc \
+	/usr/local/bin /usr/local/etc /usr/local/games \
+	/usr/local/include /usr/local/lib /usr/local/sbin \
+	/usr/local/share/man /usr/local/share/misc /usr/local/src \
+	/var/cache /var/lib/lrpkg /var/lib/misc /var/local /var/log \
+	/var/opt /var/run /var/spool
+busybox install -d -m 1777 /tmp /var/lock /var/tmp
+busybox install -d -m 0750 /root
+busybox ln -s /usr/local/share/man /usr/local/man
+busybox touch /var/log/messages # lastlog btmp utmp wtmp
+
+# mount virtual filesystems
+busybox mount -t proc   proc   /proc
+busybox mount -t sysfs  sysfs  /sys
+busybox mount -t devpts devpts /dev/pts
+
+busybox --install -s
+
+mdev -s
+
+# if it's a Raspberry Pi set options and mount /boot
+if [ -b /dev/mmcblk0p1 ]; then
+	echo 0 > /proc/sys/kernel/printk
+	echo 1 > /proc/sys/net/ipv4/ip_forward
+	echo /sbin/mdev > /proc/sys/kernel/hotplug
+	mount -o noatime /dev/mmcblk0p1 /boot
+fi
+
+# make sure that needed files and directories in /boot exists
+PKGDIR=/boot/packages
+CFGDIR=/boot/config
+CFGFILES="busybox.cfg fstab.cfg group.cfg hosts.cfg master.cfg passwd.cfg
+	rclocal.cfg resolv.cfg shadow.cfg udhcpd.cfg"
+[ ! -d "$PKGDIR" ] && rm -rf "$PKGDIR" && mkdir -p "$PKGDIR"
+[ ! -d "$CFGDIR" ] && rm -rf "$CFGDIR" && mkdir -p "$CFGDIR"
+for i in $CFGFILES; do
+	if [ ! -f "$CFGDIR/$i" ]; then
+		rm -rf "$CFGDIR/$i"
+		touch "$CFGDIR/$i"
+	fi
+done
+
+# copy and fix config files
+# fix for line ending format and new line at the end of file
+cp -a /boot/config /etc/config
+find /etc/config -type f -exec chmod -x {} \;
+find /etc/config -type f -name '*.cfg' -exec dos2unix {} \; \
+	-exec sh -c '[ "$(tail -c 1 {})" != "" ] && echo >> {}' \;
+
+# now we are ready to include these
+. /etc/config/master.cfg
+. /lib/libscript
+
+# check for required users and passwords
+chmod go-r /etc/shadow
+grep -q ^root /etc/passwd || cat >> /etc/passwd <<EOF
+root:x:0:0:root:/root:/bin/ash
+EOF
+grep -q ^nobody /etc/passwd || cat >> /etc/passwd <<EOF
+nobody:x:99:99:nobody:/:/bin/false
+EOF
+grep -q ^root /etc/shadow || cat >> /etc/shadow <<EOF
+root:EmkCkmO0o5lBI:0:0:99999:7:::
+EOF
+grep -q ^nobody /etc/shadow || cat >> /etc/shadow <<EOF
+nobody:*:0:0:99999:7:::
+EOF
+grep -q ^root /etc/group || cat >> /etc/group <<EOF
+root:x:0:
+EOF
+grep -q ^nogroup /etc/group || cat >> /etc/group <<EOF
+nogroup:x:99:
+EOF
+
+# default fstab
+[ ! -s /etc/fstab ] && cat > /etc/fstab <<EOF
+# /etc/fstab: static file system information.
+#
+# Use 'blkid' to print the universally unique identifier for a
+# device; this may be used with UUID= as a more robust way to name devices
+# that works even if disks are added and removed. See fstab(5).
+#
+# <file system> <mount point>   <type>  <options>       <dump>  <pass>
+EOF
+grep -q /dev/mmcblk0p1 /etc/fstab || cat >> /etc/fstab <<EOF
+/dev/mmcblk0p1  /boot           vfat    defaults,noatime,noauto  0  0
+EOF
+
+# create mount points
+while read DEV MP TYPE || [ -n "$MP" ]; do
+	if ! echo "$DEV" | grep -q '^#'; then
+		if [ -n "$MP" -a "$MP" != "none" ]; then
+			mkdir -p "$MP"
+		fi
+	fi
+done < /etc/fstab
+
+# /home may be a mount point, a symbolic link or create an empty directory
+[ ! -d /home -a -n "$HOME_SYMLINK" ]  && ln -s "$HOME_SYMLINK" /home
+mkdir -p /home
+
+logstart "Mounting filesystems"
+mount -a 2>> "$LOGSTDERR"
+logstatus
+
+# check for user home directories and create if needed
+while read LINE || [ -n "$LINE" ]; do
+	USER_ID=$(echo "$LINE" | cut -d : -f 3)
+	USER_HOME=$(echo "$LINE" | cut -d : -f 6)
+	if [ "$USER_ID" -eq 0 -o "$USER_ID" -gt 999 ]; then
+		if [ ! -d "$USER_HOME" -o "$USER_HOME" = "/root" ]; then
+			mkdir -p "$USER_HOME"
+			[ -d /etc/skel ] && cp -a /etc/skel/. "$USER_HOME"
+		fi
+	fi
+done < /etc/passwd
+
+# FIXME: try to do a better blacklist algorithm
+blacklist() {
+	local i
+	for i in $PKGLIST; do
+		if [ "$1" = "$i" ]; then
+			return 0
+		fi
+	done
+	return 1
+}
+
+# extract the packages
+case "$PKGMODE" in
+	[Ww]|[Ww][Hh][Ii][Tt][Ee]) PKGMODE=WHITE;;
+	[Bb]|[Bb][Ll][Aa][Cc][Kk]) PKGMODE=BLACK;;
+	*) PKGMODE=NO
+esac
+
+case "$PKGMODE" in
+	WHITE) # only the whitelisted packages
+		for i in $PKGLIST; do
+			if [ -e "$PKGDIR/$i.tgz" ]; then
+				logstart "Extracting $i package"
+				if tar xzf "$PKGDIR/$i.tgz" -C / 2>> "$LOGSTDERR"; then
+					logdone
+					echo "$i" >> /var/lib/lrpkg/packages
+				else
+					logfail
+				fi
+			fi
+		done
+		;;
+	*)
+		if [ "$(echo $PKGDIR/*.tgz)" != "$PKGDIR/*.tgz" ]; then
+			for i in $PKGDIR/*.tgz; do
+				local name=$(basename $i .tgz)
+				logstart "Extracting $name package"
+				if [ "$PKGMODE" = "BLACK" ]; then
+					if blacklist "$name"; then
+						# ignore the blacklisted packages
+						logpass "The package is blacklisted"
+						continue
+					fi
+				fi
+				if tar xzf $i -C / 2>> "$LOGSTDERR"; then
+					logdone
+					echo $(basename $i .tgz) >> /var/lib/lrpkg/packages
+				else
+					logfail
+				fi
+			done
+		fi
+		;;
+esac
+
+# if isn't a Raspberry Pi (chroot)
+# enter into login shell, umount and exit
+if [ ! -b /dev/mmcblk0p1 ]; then
+	ash -l
+	if [ "/media/*" != "/media/*" ]; then
+		for i in /media/*; do
+			[ -d "$i" ] && umount "$i"
+		done
+	fi
+	umount /dev/pts
+	umount /sys
+	umount /proc
+	echo
+	exit 0
+fi
+
+[ -n "$LOGGIN_HOST" ] && SYSLOG_OPTS="$SYSLOG_OPTS -L -R $LOGGIN_HOST"
+hostname "${HOSTNAME:-simpler}"
+syslogd $SYSLOG_OPTS
+klogd
+
+for i in $MODULES; do
+	modprobe "$i" 2>> "$LOGSTDERR"
+done
+
+service network start 2>> "$LOGSTDERR" & # network must wait for eth0
+service udhcpd start 2>> "$LOGSTDERR"
+service ntpd start 2>> "$LOGSTDERR"
+
+touch /var/lib/lrpkg/packages
+while read i || [ -n "$i" ]; do
+	[ -x "/etc/rc.d/pkgs/rc.$i" ] && "/etc/rc.d/pkgs/rc.$i" start 2>> "$LOGSTDERR"
+done < /var/lib/lrpkg/packages
+. /etc/rc.local
+
+umount /boot

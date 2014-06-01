@@ -1,0 +1,17 @@
+#!/bin/sh
+#
+# Save your current configuration files to the boot media
+
+. /lib/libscript
+
+mt_boot
+find /etc/config -name '*[-~]' -delete
+if ! diff -qrw /boot/config /etc/config > /dev/null; then
+	echo "Writing configuration files..."
+	rm -fr /boot/config/* >/dev/null 2>&1
+	cp -a /etc/config/* /boot/config >/dev/null 2>&1
+	find /boot/config -type f -name '*.cfg' -exec unix2dos {} \; \
+		-exec sh -c '[ "$(tail -c 1 {})" != "" ] && echo >> {}' \;
+	sync
+fi
+umt_boot

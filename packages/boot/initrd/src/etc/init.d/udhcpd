@@ -1,0 +1,56 @@
+#!/bin/sh
+#
+# udhcpd init script
+#
+# Config from master.cfg
+# Default UDHCPD_PORT=67
+# Default UDHCPD_ENABLED=YES
+
+. /etc/config/master.cfg
+. /lib/libscript
+
+case "$UDHCPD_ENABLED" in
+	[Nn]|[Nn][Oo]) UDHCPD_ENABLED=NO;;
+	*) UDHCPD_ENABLED=YES
+esac
+[ -z "$UDHCPD_PORT" ] && UDHCPD_PORT=67
+PID=/var/run/udhcpd.pid
+
+start() {
+	if [ -f "$PID" ]; then
+		echo "The udhcpd service is already running." >&2
+		exit 1
+	fi
+	if [ "$UDHCPD_ENABLED" = "NO" ]; then
+		echo "The udhcpd service is disabled." >&2
+		exit 1
+	fi
+	logstart "Starting UDHCP server"
+	udhcpd -S -P "$UDHCPD_PORT" 2>> "$LOGSTDERR"
+	logdone
+}
+
+stop() {
+	if [ -f "$PID" ]; then
+		kill $(cat "$PID")
+	else
+		echo "The udhcpd service isn't running." >&2
+		exit 1
+	fi
+}
+
+status() {
+	if [ -f "$PID" ]; then
+		echo -e "udhcpd\t\tYES"
+	else
+		if [ "$UDHCPD_ENABLED" = "NO" ]; then
+			echo -e "udhcpd\t\tDISABLED"
+			exit 1
+		else
+			echo -e "udhcpd\t\tNO"
+			exit 1
+		fi
+	fi
+}
+
+srvargs "$@"

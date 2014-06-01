@@ -1,0 +1,106 @@
+#!/bin/sh
+#
+# network init script
+#
+# Config from master.cfg
+
+# TODO: list the available options
+# TODO: comment and improve (maybe ifplugd)
+
+. /etc/config/master.cfg
+. /lib/libscript
+
+HOSTS=/etc/config/hosts.cfg
+RESOLV=/etc/config/resolv.cfg
+FAKEPID=/var/run/network.pid
+
+# default content if the files are empty
+[ ! -s "$HOSTS" ] && echo -e "127.0.0.1\t\tlocalhost" > "$HOSTS"
+[ ! -s "$RESOLV" ] && echo -e "nameserver 8.8.8.8\nnameserver 8.8.4.4" > "$RESOLV"
+
+netup() {
+	local NUM=1
+	while [ $(eval echo \$${1}${NUM}_DEV) ]; do
+		local DEV=$(eval echo \$${1}${NUM}_DEV)
+		local TYPE=$(eval echo \$${1}${NUM}_TYPE)
+		local IPADDR=$(eval echo \$${1}${NUM}_IPADDR)
+		local NETMASK=$(eval echo \$${1}${NUM}_NETMASK)
+		local GATEWAY=$(eval echo \$${1}${NUM}_GATEWAY)
+		[ -n "$NETMASK" ] && NETMASK="netmask $NETMASK"
+		logstart "Configuring $1$NUM Network Interface"
+		case "$TYPE" in
+			static)
+				if ! ifconfig "$DEV" "$IPADDR" $NETMASK up 2>> "$LOGSTDERR"; then
+					logfail
+					exit 1
+				fi
+				if [ "$1" = "WAN" -a -n "$GATEWAY" ]; then
+					if ! route add default gw "$GATEWAY" dev "$DEV" 2>> "$LOGSTDERR"; then
+						logfail
+						exit 1
+					fi
+				fi
+				logdone
+				;;
+			dhcp)
+				udhcpc -i "$DEV"
+				;;
+			*)
+				logfail "$1$NUM unknown network type: $TYPE"
+				;;
+		esac
+		NUM=$((NUM+1))
+	done
+}
+
+netdown() {
+	local NUM=1
+	while [ $(eval echo \$${1}${NUM}_DEV) ]; do
+		local DEV=$(eval echo \$${1}${NUM}_DEV)
+		logstart "Stopping $1$NUM Network Interface"
+		while route del default gw 0.0.0.0 dev "$DEV" 2>> "$LOGSTDERR"; do
+			:
+		done
+		ifconfig "$DEV" 0.0.0.0 down 2>> "$LOGSTDERR"
+		logstatus
+		NUM=$((NUM+1))
+	done
+}
+
+start() {
+	if [ -f "$FAKEPID" ]; then
+		echo "The network service is already running." >&2
+		exit 1
+	fi
+	until [ -d /sys/class/net/eth0 ]; do
+		sleep 0.5
+	done
+	ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
+	netup WAN
+	netup LAN
+	touch "$FAKEPID"
+}
+
+stop() {
+	if [ -f "$PIDFAKE" ]; then
+		rm "$PIDFAKE"
+	else
+		echo "The network service isn't running." >&2
+		exit 1
+	fi
+	[ -x /etc/init.d/firewall ] && /etc/init.d/firewall stop
+	ifconfig lo 0.0.0.0 down
+	netdown LAN
+	netdown WAN
+}
+
+status() {
+	if [ -f "$FAKEPID" ]; then
+		echo -e "network\t\tYES"
+	else
+		echo -e "network\t\tNO"
+		exit 1
+	fi
+}
+
+srvargs "$@"

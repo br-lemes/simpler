@@ -1,0 +1,18 @@
+
+umask 022
+
+. /etc/config/master.cfg
+
+[ -z "$EDITOR" ] && EDITOR=/usr/bin/e3ne
+PATH=/usr/local/bin:/usr/bin:/bin
+PS1="\[\033[1;32m\]\u@\h\[\033[1;34m\] \w \\$ \[\033[0;39m\]"
+
+alias mt="mount /boot"
+alias umt="umount /boot"
+
+if [ "$(id -u)" = "0" ]; then
+	PATH=/usr/local/sbin:/usr/sbin:/sbin:$PATH
+	cd /
+fi
+
+export EDITOR PATH PS1

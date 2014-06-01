@@ -1,0 +1,46 @@
+#!/bin/sh
+#
+# ntpd init script
+#
+# Config from master.cfg
+# Client always enabled
+# Default NTPD_SERVER=YES
+# Default NTPD_PEER="-p 0.pool.ntp.org -p 1.pool.ntp.org -p 2.pool.ntp.org -p 3.pool.ntp.org"
+
+. /etc/config/master.cfg
+. /lib/libscript
+
+case "$NTPD_SERVER" in
+	[Nn]|[Nn][Oo]) NTPD_SERVER=;;
+	*) NTPD_SERVER=-l
+esac
+[ -z "$NTPD_PEER" ] && NTPD_PEER="-p 0.pool.ntp.org -p 1.pool.ntp.org -p 2.pool.ntp.org -p 3.pool.ntp.org"
+PID=/var/run/ntpd.pid
+
+start() {
+	if [ -f "$PID" ]; then
+		echo "The ntpd service is already running." >&2
+		exit 1
+	fi
+	ntpd $NTPD_SERVER $NTPD_PEER 2>> "$LOGSTDERR"
+}
+
+stop() {
+	if [ -f "$PID" ]; then
+		kill $(cat "$PID")
+	else
+		echo "The ntpd service isn't running." >&2
+		exit 1
+	fi
+}
+
+status() {
+	if [ -f "$PID" ]; then
+		echo -e "ntpd\t\tYES"
+	else
+		echo -e "ntpd\t\tNO"
+		exit 1
+	fi
+}
+
+srvargs "$@"

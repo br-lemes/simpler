@@ -1,0 +1,33 @@
+#!/bin/sh
+#
+# A convenient wrapper for the /etc/init.d init scripts
+
+help() {
+	echo "Usage: $0 SERVICE {start|stop|reload|restart|status}"
+	echo "       $0 {help|list|status}"
+	echo
+	echo "A convenient wrapper for the /etc/init.d init scripts."
+	exit 1
+}
+
+if [ "$#" = 0 ]; then
+	help
+else
+	if [ "$#" = 1 ]; then
+		case "$1" in
+			status) find /etc/init.d -type f -exec {} status \;;;
+			list)   find /etc/init.d -type f -exec basename {} \;;;
+			help|*) help;;
+		esac
+	else
+		if [ "$#" = 2 ]; then
+			case "$2" in
+				start|stop|reload|restart|status)
+					[ -x "/etc/init.d/$1" ] && "/etc/init.d/$1" "$2";;
+				*) help;;
+			esac
+		else
+			help
+		fi
+	fi
+fi

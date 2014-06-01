@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+# Rebuild a package tarball to the boot media
+
+. /lib/libscript
+
+mt_boot
+tar czf "/boot/packages/$1.tgz" -T "/var/lib/lrpkg/$1.list" -C /
+umt_boot

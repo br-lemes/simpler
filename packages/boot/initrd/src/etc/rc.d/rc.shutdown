@@ -1,0 +1,7 @@
+#!/bin/sh
+#
+# system shutdown script
+
+while read i || [ -n "$i" ]; do
+	[ -x "/etc/rc.d/pkgs/rc.$i" ] && "/etc/rc.d/pkgs/rc.$i" poweroff
+done < /var/lib/lrpkg/packages

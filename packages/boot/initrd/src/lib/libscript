@@ -1,0 +1,148 @@
+#!/bin/sh
+#
+# system library script
+#
+# Useful functions to use in your init scripts
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+[ -z "$LOGSTDERR" ] && LOGSTDERR=/var/log/stderr
+
+grep -q /boot /proc/mounts
+BOOT="$?"
+
+mt_boot() {
+	[ "$BOOT" != "0" ] && mount /boot
+}
+
+umt_boot() {
+	[ "$BOOT" != "0" ] && umount /boot
+}
+
+pkghelp() {
+	echo "Usage: $0 {start|stop|poweroff|lineup}"
+	exit 1
+}
+
+srvhelp() {
+	echo "Usage: $0 {start|stop|reload|restart|status}"
+	exit 1
+}
+
+callfunc() {
+	if type "$1" | grep -q function; then
+		"$1"
+	else
+		echo "No $1 function defined."
+		exit 1
+	fi
+}
+
+pkgargs() {
+	if [ "$#" != 1 ]; then
+		type help | grep -q function && help || pkghelp
+	fi
+	case "$1" in
+		start|stop|poweroff|lineup)
+			callfunc "$1"
+		;;
+		*)
+			if type "$1" | grep -q function; then
+				"$1"
+			else
+				type help | grep -q function && help || pkghelp
+			fi
+		;;
+	esac
+}
+
+srvargs() {
+	if [ "$#" != "1" ]; then
+		type help | grep -q function && help || srvhelp
+	fi
+	case "$1" in
+		start|stop|reload|status)
+			callfunc "$1"
+		;;
+		restart)
+			if type "$1" | grep -q function; then
+				"$1"
+			else
+				callfunc stop
+				callfunc start
+			fi
+		;;
+		*)
+			if type "$1" | grep -q function; then
+				"$1"
+			else
+				type help | grep -q function && help || srvhelp
+			fi
+		;;
+	esac
+}
+
+checkcfgdir() { # make sure $1 exists and is a directory
+	if [ ! -d "/etc/config/$1" ]; then
+		rm -rf "/etc/config/$1"
+		mkdir -p "/etc/config/$1"
+		if grep -q /boot /proc/mounts; then
+			rm -rf "/boot/config/$1"
+			mkdir -p "/boot/config/$1"
+		fi
+	fi
+}
+
+checkcfgfile() { # make sure $1 exists and is a file
+	if [ ! -f "/etc/config/$1" ]; then
+		rm -rf "/etc/config/$1"
+		touch "/etc/config/$1"
+		if grep -q /boot /proc/mounts; then
+			rm -rf "/boot/config/$1"
+			touch "/boot/config/$1"
+		fi
+	fi
+}
+
+logmsg=
+
+logstart() {
+	[ -z "$1" ] && return
+	logmsg="$1"
+	[ -t 1 ] && printf "\033[1G[....] $1"
+	printf "$(date '+%F %T')\n$1\n" >> "$LOGSTDERR"
+}
+
+logstatus() {
+	if [ "$?" = "0" ]; then
+		logdone "$1"
+	else
+		logfail "$1"
+	fi
+}
+
+logfail() {
+	logprint 31 FAIL "$1"
+}
+
+logdone() {
+	logprint 32 DONE "$1"
+}
+
+logpass() {
+	logprint 33 PASS "$1"
+}
+
+logprint() {
+	[ -z "$logmsg" ] && return
+	if [ -t 1 ]; then
+		printf "\033[2G\033[1;$1m$2\033[0m\n"
+	else
+		printf "[$2] $logmsg\n"
+	fi
+	logger "[$2] $logmsg"
+	if [ -n "$3" ]; then
+		printf "$3\n" >> "$LOGSTDERR"
+		logger "$3"
+	fi
+}

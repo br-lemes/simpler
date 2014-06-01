@@ -1,0 +1,13 @@
+#!/bin/sh
+#
+# Show which configuration files differs from the boot media version
+
+. /lib/libscript
+
+mt_boot
+find /etc/config -name '*[-~]' -delete
+if ! diff -qrw /boot/config /etc/config; then
+	echo
+	echo "WARNING: you need to backup!"
+fi
+umt_boot

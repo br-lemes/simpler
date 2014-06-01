@@ -1,0 +1,60 @@
+#!/bin/sh
+#
+# List the installed packages, the files from a package or the packages
+# containing a file pattern
+
+FOUND=N
+LRPKG=/var/lib/lrpkg
+LIST=$(find "$LRPKG" -name '*.list' -exec basename {} .list \;)
+SEDC="s-$LRPKG/--;s-\.list--"
+
+help() {
+	echo "Usage: $0"
+	echo "       $0 -L {package}"
+	echo "       $0 -S {filepattern}"
+	echo "       $0 {package|filepattern}"
+	echo
+	echo "List the installed packages, the files from a package or the packages"
+	echo "containing a file pattern."
+	exit 1
+}
+
+if [ "$#" = 0 ]; then
+	for i in $LIST; do
+		echo "$i"
+	done
+elif [ "$#" = 1 ]; then
+	case "$1" in
+		-h|--help|-L|-S)
+			help
+			;;
+		*)
+			for i in $LIST; do
+				if [ "$1" = "$i" ]; then
+					cat "$LRPKG/$i.list"
+					FOUND=Y
+				fi
+			done
+			if [ "$FOUND" = "N" ]; then
+				local i=$(echo "$1" | sed -e s-^/--)
+				grep "$i" "$LRPKG/*.list" | sed -e "$SEDC"
+			fi
+			;;
+	esac
+elif [ "$#" = 2 ]; then
+	case "$1" in
+		-L)
+			for i in $LIST; do
+				if [ "$2" = "$i" ]; then
+					cat "$LRPKG/$i.list"
+				fi
+			done
+			;;
+		-S)
+			local i=$(echo "$2" | sed -e s-^/--)
+			grep "$i" "$LRPKG/*.list" | sed -e "$SEDC"
+			;;
+	esac
+else
+	help
+fi
