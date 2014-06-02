@@ -10,32 +10,6 @@
 
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-# make sure that needed files and directories exists
-busybox mkdir -p \
-	/bin     \
-	/boot    \
-	/dev/pts \
-	/etc/opt \
-	/lib     \
-	/media   \
-	/mnt     \
-	/opt     \
-	/proc    \
-	/sbin    \
-	/srv     \
-	/sys     \
-	/usr/bin /usr/include /usr/lib /usr/sbin \
-	/usr/share/man /usr/share/misc \
-	/usr/local/bin /usr/local/etc /usr/local/games \
-	/usr/local/include /usr/local/lib /usr/local/sbin \
-	/usr/local/share/man /usr/local/share/misc /usr/local/src \
-	/var/cache /var/lib/lrpkg /var/lib/misc /var/local /var/log \
-	/var/opt /var/run /var/spool
-busybox install -d -m 1777 /tmp /var/lock /var/tmp
-busybox install -d -m 0750 /root
-busybox ln -s /usr/local/share/man /usr/local/man
-busybox touch /var/log/messages # lastlog btmp utmp wtmp
-
 # mount virtual filesystems
 busybox mount -t proc   proc   /proc
 busybox mount -t sysfs  sysfs  /sys
@@ -45,6 +19,8 @@ busybox --install -s
 
 mdev -s
 
+touch /var/log/messages /var/log/lastlog # btmp utmp wtmp
+
 # if it's a Raspberry Pi set options and mount /boot
 if [ -b /dev/mmcblk0p1 ]; then
 	echo 0 > /proc/sys/kernel/printk
@@ -53,7 +29,7 @@ if [ -b /dev/mmcblk0p1 ]; then
 	mount -o noatime /dev/mmcblk0p1 /boot
 fi
 
-# make sure that needed files and directories in /boot exists
+# make sure that needed files and directories exists
 PKGDIR=/boot/packages
 CFGDIR=/boot/config
 CFGFILES="busybox.cfg fstab.cfg group.cfg hosts.cfg master.cfg passwd.cfg

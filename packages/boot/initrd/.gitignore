@@ -1,3 +1,4 @@
+initrd.gz
 src/bin/busybox
 src/lib/libc.so
 src/lib/libgcc_s.so.1

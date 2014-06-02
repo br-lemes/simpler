@@ -8,11 +8,14 @@ LIBSTDCXX=/opt/cross/$(TARGET)/$(TARGET)/lib/libstdc++.so
 PKGCLEAN=src/bin/busybox src/lib/libc.so src/lib/libgcc_s.so.1 \
 	src/lib/libstdc++.so*
 
-all: $(subst *,,$(PKGCLEAN)) src/dev/console
+all: ../../../boot/initrd.gz
 
-src/dev/console:
-	@mkdir -p $(dir $@)
-	@sudo mknod $@ c 5 1
+../../../boot/initrd.gz: initrd.gz
+	@ln -f $< $@
+
+initrd.gz: $(subst *,,$(PKGCLEAN))
+	@cd src && find . | cpio --quiet -H newc -o --owner=0:0 | \
+		gzip -9 -n > ../initrd.gz
 
 src/bin/busybox: ../busybox/busybox-*/busybox
 	@cp -a $< $@
