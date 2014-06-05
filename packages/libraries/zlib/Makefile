@@ -11,7 +11,7 @@ PKGBUILD=$(PKGPATH)/libz.so
 
 include ../../../Makefile.in
 
-all: $(PKGBOOT)
+all: $(PKGBOOT) $(PKGNAME)-dev.tgz
 
 $(PKGPATH)/libz.so:
 	@$(MAKE) $(PKGPATH)
@@ -19,6 +19,13 @@ $(PKGPATH)/libz.so:
 	@$(MAKE) -C $(PKGPATH)
 	@$(STRIP) $@
 
-pack: $(PKGPATH)/libz.so
-	@mkdir -p pack/usr/lib
-	@cp -a $<* pack/usr/lib
+pack:
+	@$(RM) -r $@
+	@mkdir -p $@/usr/lib
+	@cp -a $(PKGPATH)/libz.so* $@/usr/lib
+
+pack-dev:
+	@$(RM) -r $@
+	@mkdir -p $@/usr/include $@/usr/lib
+	@cp -a $(PKGPATH)/zconf.h $(PKGPATH)/zlib.h $@/usr/include
+	@cp -a $(PKGPATH)/libz.a $@/usr/lib

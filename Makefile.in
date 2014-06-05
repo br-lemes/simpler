@@ -16,7 +16,6 @@ HOST=$(shell $(CC) -dumpmachine)
 TARGET=arm-linux-musleabihf
 ARCH=arm
 ARM_ARCH=armv6zk
-LRPKG=pack/var/lib/lrpkg
 
 # often used workaround to recognize musl triple
 SEDMUSL=sed -i -e 's/linux-newlib/linux-musl/'
@@ -80,8 +79,8 @@ endif
 
 # cleans generated or temporary files
 clean:
-	@echo $(RM) -r $(PKGCLEAN) $(PKGNAME).tgz *.part pack
-	@$(RM) -r $(PKGCLEAN) $(PKGNAME).tgz *.part pack
+	@echo $(RM) -r $(PKGCLEAN) $(PKGNAME).tgz $(PKGNAME)-dev.tgz *.part pack pack-dev
+	@$(RM) -r $(PKGCLEAN) $(PKGNAME).tgz $(PKGNAME)-dev.tgz *.part pack pack-dev
 
 # cleans build files
 binclean: clean
@@ -103,14 +102,22 @@ $(PKGBOOT): $(PKGNAME).tgz ../../../boot/packages
 	@ln -f $< $@
 
 # generates a package with version and list info
-$(PKGNAME).tgz: $(PKGBUILD)
-	@$(MAKE) pack
-	@mkdir -p $(LRPKG)
-	@echo "VERSION=$(PKGVERSION)" > $(LRPKG)/$(PKGNAME).version
-	@echo "BUILD=$(shell date +%F-%Z)" >> $(LRPKG)/$(PKGNAME).version
-	@touch $(LRPKG)/$(PKGNAME).list
-	@find pack/ -type f -o -type l | sed 's,pack/,,' > $(LRPKG)/$(PKGNAME).list
-	@tar czf $@ -C pack --owner=root --group=root -T $(LRPKG)/$(PKGNAME).list
+$(PKGNAME).tgz $(PKGNAME)-dev.tgz: $(PKGBUILD)
+	@if [ "$@" = "$(PKGNAME)-dev.tgz" ]; then \
+		PKGDEV=-dev; \
+		LRPKG=pack-dev/var/lib/lrpkg; \
+		$(MAKE) pack-dev; \
+	else \
+		PKGDEV=; \
+		LRPKG=pack/var/lib/lrpkg; \
+		$(MAKE) pack; \
+	fi; \
+	mkdir -p $$LRPKG; \
+	echo "VERSION=$(PKGVERSION)" > $$LRPKG/$(PKGNAME)$$PKGDEV.version; \
+	echo "BUILD=$$(date +%F-%Z)" >> $$LRPKG/$(PKGNAME)$$PKGDEV.version; \
+	touch $$LRPKG/$(PKGNAME)$$PKGDEV.list; \
+	find pack$$PKGDEV/ -type f -o -type l | sed "s,pack$$PKGDEV/,," > $$LRPKG/$(PKGNAME)$$PKGDEV.list; \
+	tar czf $@ -C pack$$PKGDEV --owner=root --group=root -T $$LRPKG/$(PKGNAME)$$PKGDEV.list
 endif
 
 # extracts a tarball and apply a patch if any
@@ -129,4 +136,4 @@ $(PKGFILE):
 	@echo "$(PKGMD5SUM)  $@" | md5sum -c || $(RM) $@
 endif
 
-.PHONY: all default show version clean binclean downclean pack md5sum
+.PHONY: all default show version clean binclean downclean pack pack-dev md5sum
