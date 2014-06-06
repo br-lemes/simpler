@@ -1,8 +1,10 @@
 
 INITRD=../packages/boot/initrd
+INITRAMFS=../linux/usr/initramfs_data.cpio.gz
 
 all:
 	@$(MAKE) -C $(INITRD)
+	@if [ ! -e $(INITRAMFS) ]; then $(MAKE) -C ../packages/boot/kernel; fi
 	@mkdir -p build
 	@$(MAKE) -s build
 
@@ -12,6 +14,7 @@ qemu-arm-static:
 build: qemu-arm-static
 ifeq ($(shell id -u), 0)
 	@mount -t tmpfs tmpfs $@
+	@cd $@ && gunzip -c ../$(INITRAMFS) | cpio -i --quiet
 	@mkdir -p $@/boot
 	@mount --bind ../boot $@/boot
 	@cp -a --no-preserve=ownership $(INITRD)/src/* $@
