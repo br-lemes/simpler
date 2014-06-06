@@ -46,4 +46,4 @@ dir /var/opt               0755 0 0
 dir /var/run               0755 0 0
 dir /var/spool             0755 0 0
 dir /var/tmp               1777 0 0
-slink /usr/local/share/man /usr/local/man 0777 0 0
+slink /usr/local/man /usr/local/share/man 0777 0 0
