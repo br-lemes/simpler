@@ -4,6 +4,21 @@
 
 . /lib/libscript
 
-mt_boot
+help() {
+	echo "\
+Usage: $(basename "$0") <package>
+
+Rebuild a package tarball to the boot media."
+	exit 1
+}
+
+[ "$#" != 1 -o "$1" = "-h" -o "$1" = "--help" ] && help
+
+if [ ! -f "/var/lib/lrpkg/$1.list" ]; then
+	echo "Package $1 not found." >&2
+	exit 1
+fi
+
+mt_boot || exit 1
 tar czf "/boot/packages/$1.tgz" -T "/var/lib/lrpkg/$1.list" -C /
 umt_boot
