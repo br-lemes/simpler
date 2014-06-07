@@ -3,10 +3,11 @@
 # A convenient wrapper for the /etc/init.d init scripts
 
 help() {
-	echo "Usage: $0 SERVICE {start|stop|reload|restart|status}"
-	echo "       $0 {help|list|status}"
-	echo
-	echo "A convenient wrapper for the /etc/init.d init scripts."
+	echo "\
+Usage: $(basename "$0") <service> [start|stop|reload|restart|status]
+    or $(basename "$0") [help|list|status]
+
+A convenient wrapper for the /etc/init.d init scripts."
 	exit 1
 }
 
@@ -17,7 +18,13 @@ else
 		case "$1" in
 			status) find /etc/init.d -type f -exec {} status \;;;
 			list)   find /etc/init.d -type f -exec basename {} \;;;
-			help|*) help;;
+			help) help;;
+			*)
+				if [ -x "/etc/init.d/$1" ]; then
+					"/etc/init.d/$1" status
+				else
+					help
+				fi;;
 		esac
 	else
 		if [ "$#" = 2 ]; then
