@@ -4,7 +4,17 @@
 
 . /lib/libscript
 
-mt_boot
+help() {
+	echo "\
+Usage: $(basename "$0")
+
+Save your current configuration files to the boot media."
+	exit 1
+}
+
+[ "$#" != 0 ] && help
+
+mt_boot || exit 1
 find /etc/config -name '*[-~]' -delete
 if ! diff -qrw /boot/config /etc/config > /dev/null; then
 	echo "Writing configuration files..."
