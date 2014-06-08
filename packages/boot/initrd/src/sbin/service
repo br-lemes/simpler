@@ -7,7 +7,7 @@ help() {
 Usage: $(basename "$0") <service> [start|stop|reload|restart|status]
     or $(basename "$0") [help|list|status]
 
-A convenient wrapper for the /etc/init.d init scripts."
+A convenient wrapper for the /etc/init.d init scripts." >&2
 	exit 1
 }
 

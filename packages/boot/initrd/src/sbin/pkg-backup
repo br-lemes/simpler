@@ -8,7 +8,7 @@ help() {
 	echo "\
 Usage: $(basename "$0") <package>
 
-Rebuild a package tarball to the boot media."
+Rebuild a package tarball to the boot media." >&2
 	exit 1
 }
 

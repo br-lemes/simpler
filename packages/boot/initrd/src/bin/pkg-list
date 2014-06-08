@@ -15,7 +15,7 @@ Usage: $(basename "$0") [package|filepattern]
     or $(basename "$0") -S <filepattern>
 
 List the installed packages, the files from a package or the packages
-containing a file pattern."
+containing a file pattern." >&2
 	exit 1
 }
 

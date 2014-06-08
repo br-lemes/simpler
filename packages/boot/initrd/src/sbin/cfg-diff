@@ -4,7 +4,17 @@
 
 . /lib/libscript
 
-mt_boot
+help() {
+	echo "\
+Usage: $(basename "$0")
+
+Show which configuration files differs from the boot media version." >&2
+	exit 1
+}
+
+[ "$#" != 0 ] && help
+
+mt_boot || exit
 find /etc/config -name '*[-~]' -delete
 if ! diff -qrw /boot/config /etc/config; then
 	echo
