@@ -12,11 +12,17 @@ grep -q /boot /proc/mounts
 BOOT="$?"
 
 mt_boot() {
-	[ "$BOOT" != "0" ] && mount /boot
+	if [ "$BOOT" != "0" ]; then
+		mount /boot
+		return "$?"
+	fi
 }
 
 umt_boot() {
-	[ "$BOOT" != "0" ] && umount /boot
+	if [ "$BOOT" != "0" ]; then
+		umount /boot
+		return "$?"
+	fi
 }
 
 pkghelp() {
