@@ -2,12 +2,14 @@
 #
 # A convenient wrapper for the /etc/init.d init scripts
 
+. /lib/libscript
+
 help() {
 	echo "\
 Usage: $(basename "$0") <service> [start|stop|reload|restart|status]
     or $(basename "$0") [help|list|status]
 
-A convenient wrapper for the /etc/init.d init scripts." >&2
+$DESCRIPTION." >&2
 	exit 1
 }
 

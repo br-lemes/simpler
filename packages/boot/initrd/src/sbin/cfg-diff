@@ -8,7 +8,7 @@ help() {
 	echo "\
 Usage: $(basename "$0")
 
-Show which configuration files differs from the boot media version." >&2
+$DESCRIPTION." >&2
 	exit 1
 }
 
