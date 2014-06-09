@@ -29,65 +29,10 @@ if [ -b /dev/mmcblk0p1 ]; then
 	mount -o noatime /dev/mmcblk0p1 /boot
 fi
 
-# make sure that needed files and directories exists
-PKGDIR=/boot/packages
-CFGDIR=/boot/config
-CFGFILES="busybox.cfg fstab.cfg group.cfg hosts.cfg master.cfg passwd.cfg
-	rclocal.cfg resolv.cfg shadow.cfg udhcpd.cfg"
-[ ! -d "$PKGDIR" ] && rm -rf "$PKGDIR" && mkdir -p "$PKGDIR"
-[ ! -d "$CFGDIR" ] && rm -rf "$CFGDIR" && mkdir -p "$CFGDIR"
-for i in $CFGFILES; do
-	if [ ! -f "$CFGDIR/$i" ]; then
-		rm -rf "$CFGDIR/$i"
-		touch "$CFGDIR/$i"
-	fi
-done
+cfg-init
+cfg-load
 
-# copy and fix config files
-# fix for line ending format and new line at the end of file
-cp -a /boot/config /etc/config
-find /etc/config -type f -exec chmod -x {} \;
-find /etc/config -type f -name '*.cfg' -exec dos2unix {} \; \
-	-exec sh -c '[ "$(tail -c 1 {})" != "" ] && echo >> {}' \;
-
-# now we are ready to include these
-. /etc/config/master.cfg
 . /lib/libscript
-
-# check for required users and passwords
-chmod go-r /etc/shadow
-grep -q ^root /etc/passwd || cat >> /etc/passwd <<EOF
-root:x:0:0:root:/root:/bin/ash
-EOF
-grep -q ^nobody /etc/passwd || cat >> /etc/passwd <<EOF
-nobody:x:99:99:nobody:/:/bin/false
-EOF
-grep -q ^root /etc/shadow || cat >> /etc/shadow <<EOF
-root:EmkCkmO0o5lBI:0:0:99999:7:::
-EOF
-grep -q ^nobody /etc/shadow || cat >> /etc/shadow <<EOF
-nobody:*:0:0:99999:7:::
-EOF
-grep -q ^root /etc/group || cat >> /etc/group <<EOF
-root:x:0:
-EOF
-grep -q ^nogroup /etc/group || cat >> /etc/group <<EOF
-nogroup:x:99:
-EOF
-
-# default fstab
-[ ! -s /etc/fstab ] && cat > /etc/fstab <<EOF
-# /etc/fstab: static file system information.
-#
-# Use 'blkid' to print the universally unique identifier for a
-# device; this may be used with UUID= as a more robust way to name devices
-# that works even if disks are added and removed. See fstab(5).
-#
-# <file system> <mount point>   <type>  <options>       <dump>  <pass>
-EOF
-grep -q /dev/mmcblk0p1 /etc/fstab || cat >> /etc/fstab <<EOF
-/dev/mmcblk0p1  /boot           vfat    defaults,noatime,noauto  0  0
-EOF
 
 # create mount points
 while read DEV MP TYPE || [ -n "$MP" ]; do
@@ -118,60 +63,14 @@ while read LINE || [ -n "$LINE" ]; do
 	fi
 done < /etc/passwd
 
-# FIXME: try to do a better blacklist algorithm
-blacklist() {
-	local i
-	for i in $PKGLIST; do
-		if [ "$1" = "$i" ]; then
-			return 0
-		fi
-	done
-	return 1
-}
-
 # extract the packages
-case "$PKGMODE" in
-	[Ww]|[Ww][Hh][Ii][Tt][Ee]) PKGMODE=WHITE;;
-	[Bb]|[Bb][Ll][Aa][Cc][Kk]) PKGMODE=BLACK;;
-	*) PKGMODE=NO
-esac
-
-case "$PKGMODE" in
-	WHITE) # only the whitelisted packages
-		for i in $PKGLIST; do
-			if [ -e "$PKGDIR/$i.tgz" ]; then
-				logstart "Extracting $i package"
-				if tar xzf "$PKGDIR/$i.tgz" -C / 2>> "$LOGSTDERR"; then
-					logdone
-					echo "$i" >> /var/lib/lrpkg/packages
-				else
-					logfail
-				fi
-			fi
-		done
-		;;
-	*)
-		if [ "$(echo $PKGDIR/*.tgz)" != "$PKGDIR/*.tgz" ]; then
-			for i in $PKGDIR/*.tgz; do
-				local name=$(basename $i .tgz)
-				logstart "Extracting $name package"
-				if [ "$PKGMODE" = "BLACK" ]; then
-					if blacklist "$name"; then
-						# ignore the blacklisted packages
-						logpass "The package is blacklisted"
-						continue
-					fi
-				fi
-				if tar xzf $i -C / 2>> "$LOGSTDERR"; then
-					logdone
-					echo $(basename $i .tgz) >> /var/lib/lrpkg/packages
-				else
-					logfail
-				fi
-			done
-		fi
-		;;
-esac
+if [ "$(echo /boot/packages/*.tgz)" != "/boot/packages/*.tgz" ]; then
+	for i in /boot/packages/*.tgz; do
+		logstart "Extracting '$(basename "$i" .tgz)' package"
+		pkg-extract "$i" 2>> "$LOGSTDERR"
+		logstatus
+	done
+fi
 
 # if isn't a Raspberry Pi (chroot)
 # enter into login shell, umount and exit
