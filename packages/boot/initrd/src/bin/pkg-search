@@ -1,0 +1,18 @@
+#!/bin/sh
+#
+# Lists the packages containing a file name pattern
+
+. /lib/libscript
+
+help() {
+	echo "\
+Usage: $(basename "$0") <filenamepattern>
+
+$DESCRIPTION." >&2
+	exit 1
+}
+
+[ "$#" != 1 -o "$1" = "-h" -o "$1" = "--help" ] && help
+
+grep "$(echo "$1" | sed -e s-^/--)" $LRPKG/*.list 2> /dev/null \
+	| sed -e "s-$LRPKG/--;s-\.list--"

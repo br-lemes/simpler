@@ -1,59 +1,27 @@
 #!/bin/sh
 #
-# List the installed packages, the files from a package or the packages
-# containing a file pattern
+# Lists the installed packages or the files from a package
 
-FOUND=N
-LRPKG=/var/lib/lrpkg
-LIST=$(find "$LRPKG" -name '*.list' -exec basename {} .list \; 2> /dev/null)
-SEDC="s-$LRPKG/--;s-\.list--"
+. /lib/libscript
 
 help() {
 	echo "\
-Usage: $(basename "$0") [package|filepattern]
-    or $(basename "$0") -L <package>
-    or $(basename "$0") -S <filepattern>
+Usage: $(basename "$0") [package]
 
-List the installed packages, the files from a package or the packages
-containing a file pattern." >&2
+$DESCRIPTION." >&2
 	exit 1
 }
 
 if [ "$#" = 0 ]; then
-	for i in $LIST; do
-		echo "$i"
-	done
+	if [ "$(echo $LRPKG/*.list)" != "$LRPKG/*.list" ]; then
+		for i in $LRPKG/*.list; do
+			basename "$i" .list
+		done
+	fi
 elif [ "$#" = 1 ]; then
 	case "$1" in
-		-h|--help|-L|-S)
-			help
-			;;
-		*)
-			for i in $LIST; do
-				if [ "$1" = "$i" ]; then
-					cat "$LRPKG/$i.list"
-					FOUND=Y
-				fi
-			done
-			if [ "$FOUND" = "N" ]; then
-				i=$(echo "$1" | sed -e s-^/--)
-				grep "$i" $LRPKG/*.list 2> /dev/null | sed -e "$SEDC"
-			fi
-			;;
-	esac
-elif [ "$#" = 2 ]; then
-	case "$1" in
-		-L)
-			for i in $LIST; do
-				if [ "$2" = "$i" ]; then
-					cat "$LRPKG/$i.list"
-				fi
-			done
-			;;
-		-S)
-			i=$(echo "$2" | sed -e s-^/--)
-			grep "$i" $LRPKG/*.list 2> /dev/null | sed -e "$SEDC"
-			;;
+		-h|--help) help;;
+		*) [ -f "$LRPKG/$1.list" ] && cat "$LRPKG/$1.list";;
 	esac
 else
 	help
