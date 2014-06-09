@@ -4,7 +4,20 @@
 #
 # Useful functions to use in your init scripts
 
+case "$0" in
+	/sbin/*|/usr/sbin/*|/usr/local/sbin/*|/etc/init.d/*|/etc/rc.d/*)
+		if [ "$(id -u)" != "0" ]; then
+			echo "You must be root to perform this command." >&2
+			exit 1
+		fi
+		;;
+esac
+
+[ -f /etc/config/master.cfg ] && . /etc/config/master.cfg
+
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+LRPKG=/var/lib/lrpkg
+DESCRIPTION="$(head -3 "$0" | tail -1 | sed -e 's/^# //')"
 
 [ -z "$LOGSTDERR" ] && LOGSTDERR=/var/log/stderr
 
@@ -26,12 +39,12 @@ umt_boot() {
 }
 
 pkghelp() {
-	echo "Usage: $0 {start|stop|poweroff|lineup}"
+	echo "Usage: $0 {start|stop|poweroff|lineup}" >&2
 	exit 1
 }
 
 srvhelp() {
-	echo "Usage: $0 {start|stop|reload|restart|status}"
+	echo "Usage: $0 {start|stop|reload|restart|status}" >&2
 	exit 1
 }
 
@@ -39,7 +52,7 @@ callfunc() {
 	if type "$1" | grep -q function; then
 		"$1"
 	else
-		echo "No $1 function defined."
+		echo "No $1 function defined." >&2
 		exit 1
 	fi
 }
