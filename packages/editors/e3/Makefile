@@ -2,6 +2,7 @@
 PKGNAME=e3
 PKGVERSION=2.7.1
 PKGFEXT=gz
+PKGCATEGORIES=editors
 PKGDESC=A mini text editor
 PKGSITE=https://sites.google.com/site/e3editor/
 PKGDOWN=https://sites.google.com/site/e3editor/Home/

@@ -2,6 +2,7 @@
 PKGNAME=zlib
 PKGVERSION=1.2.8
 PKGFEXT=gz
+PKGCATEGORIES=libraries
 PKGDESC=Compression Library
 PKGSITE=http://zlib.net/
 PKGDOWN=http://zlib.net/

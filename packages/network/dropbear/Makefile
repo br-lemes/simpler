@@ -2,6 +2,8 @@
 PKGNAME=dropbear
 PKGVERSION=2013.62
 PKGFEXT=bz2
+PKGDEPENDENCIES=zlib
+PKGCATEGORIES=network
 PKGDESC=Dropbear is a relatively small SSH server and client 
 PKGSITE=https://matt.ucc.asn.au/dropbear/dropbear.html
 PKGDOWN=https://matt.ucc.asn.au/dropbear/

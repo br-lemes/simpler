@@ -2,6 +2,8 @@
 PKGNAME=rsync
 PKGVERSION=3.1.0
 PKGFEXT=gz
+PKGDEPENDENCIES=zlib
+PKGCATEGORIES=network
 PKGDESC=Fast incremental file transfer
 PKGSITE=http://rsync.samba.org/
 PKGDOWN=http://rsync.samba.org/ftp/rsync/src/
