@@ -1,0 +1,64 @@
+#!/bin/sh
+#
+# Make sure that needed configuration exists within appropriate defaults
+
+. /lib/libscript
+
+help() {
+	echo "\
+Usage: $(basename "$0")
+
+$DESCRIPTION." >&2
+	exit 1
+}
+
+[ "$#" != 0 ] && help
+
+mt_boot || exit 1
+PKGDIR=/boot/packages
+CFGDIR=/boot/config
+CFGFILES="busybox.cfg fstab.cfg group.cfg hosts.cfg master.cfg passwd.cfg
+	rclocal.cfg resolv.cfg shadow.cfg udhcpd.cfg"
+[ ! -d "$PKGDIR" ] && rm -rf "$PKGDIR" && mkdir -p "$PKGDIR"
+[ ! -d "$CFGDIR" ] && rm -rf "$CFGDIR" && mkdir -p "$CFGDIR"
+for i in $CFGFILES; do
+	if [ ! -f "$CFGDIR/$i" ]; then
+		rm -rf "$CFGDIR/$i"
+		touch "$CFGDIR/$i"
+	fi
+done
+
+# check for required users and passwords
+grep_or_insert() {
+	grep -q "$1" "$CFGDIR/$2" || echo "$3" >> "$CFGDIR/$2"
+}
+grep_or_insert ^root    passwd.cfg root:x:0:0:root:/root:/bin/ash
+grep_or_insert ^nobody  passwd.cfg nobody:x:99:99:nobody:/:/bin/false
+grep_or_insert ^root    shadow.cfg root:EmkCkmO0o5lBI:0:0:99999:7:::
+grep_or_insert ^nobody  shadow.cfg nobody:*:0:0:99999:7:::
+grep_or_insert ^root    group.cfg  root:x:0:
+grep_or_insert ^nogroup group.cfg  nogroup:x:99:
+
+# default fstab
+[ ! -s "$CFGDIR/fstab.cfg" ] && cat > "$CFGDIR/fstab.cfg" <<EOF
+# /etc/fstab: static file system information.
+#
+# Use 'blkid' to print the universally unique identifier for a
+# device; this may be used with UUID= as a more robust way to name devices
+# that works even if disks are added and removed. See fstab(5).
+#
+# <file system> <mount point>   <type>  <options>       <dump>  <pass>
+EOF
+grep -q /dev/mmcblk0p1 "$CFGDIR/fstab.cfg" || cat >> "$CFGDIR/fstab.cfg" <<EOF
+/dev/mmcblk0p1  /boot           vfat    defaults,noatime,noauto  0  0
+EOF
+
+[ ! -s "$CFGDIR/hosts.cfg" ] && cat > "$CFGDIR/hosts.cfg" <<EOF
+127.0.0.1		localhost
+EOF
+[ ! -s "$CFGDIR/resolv.cfg" ] && cat > "$CFGDIR/resolv.cfg" <<EOF
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+EOF
+
+umt_boot

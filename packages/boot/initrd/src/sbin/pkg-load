@@ -1,0 +1,81 @@
+#!/bin/sh
+#
+# Extracts a package from a file or from the boot media,
+# pkg-extract just extracts and doesn't care about dependencies
+# pkg-load starts the services if any and looks for dependencies
+
+. /lib/libscript
+
+help() {
+	echo "\
+Usage: $(basename "$0") <package>
+
+$DESCRIPTION
+$(grep ^#\ $(basename "$0") "$0" | sed -e s/^#\ $(basename "$0")\ //)." >&2
+	exit 1
+}
+
+[ "$#" != 1 -o "$1" = "-h" -o "$1" = "--help" ] && help
+
+# tries to guess package name and package file
+pkgname="$(basename $1 .tgz)"
+if [ -f "$1" ]; then
+	pkgfile="$1"
+elif [ -f "$1.tgz" ]; then
+	pkgfile="$1.tgz"
+else
+	mt_boot || exit 1
+	if [ -f "/boot/packages/$pkgname.tgz" ]; then
+		pkgfile="/boot/packages/$pkgname.tgz"
+	else
+		echo "Package '$pkgname' not found." >&2
+		exit 1
+	fi
+fi
+
+if grep -q "^$pkgname$" "$LRPKG/packages"; then
+	echo "Package '$pkgname' already loaded." >&2
+	exit 1
+fi
+
+case "$PKGMODE" in
+	[Ww]|[Ww][Hh][Ii][Tt][Ee]) PKGMODE=WHITE;;
+	[Bb]|[Bb][Ll][Aa][Cc][Kk]) PKGMODE=BLACK;;
+	*) PKGMODE=NO
+esac
+
+case "$PKGMODE" in
+	WHITE)
+		if ! echo " $PKGLIST" | tr "\n\t" " " | grep -q " $pkgname "; then
+			echo "Package '$pkgname' is not whitelisted." >&2
+			exit 1
+		fi
+		;;
+	BLACK)
+		if echo " $PKGLIST" | tr "\n\t" " " | grep -q " $pkgname "; then
+			echo "Package '$pkgname' is blacklisted." >&2
+			exit 1
+		fi
+		;;
+esac
+
+# presume it's already extracted if the package listing exists
+if [ ! -f "$LRPKG/$pkgname.list" ]; then
+	if [ "$(basename $0)" = "pkg-load" ]; then
+		tar xzf "$pkgfile" -C / "var/lib/lrpkg/$pkgname.info"
+		. "$LRPKG/$pkgname.info"
+		for i in $DEPENDENCIES; do
+			if ! grep -q "$i" "$LRPKG/packages"; then
+				echo "Package '$pkgname' depends on '$i' not found." >&2
+				rm "$LRPKG/$pkgname.info"
+				exit 1
+			fi
+		done
+	fi
+	tar xzf "$pkgfile" -C /
+fi
+
+echo "$pkgname" >> "$LRPKG/packages"
+if [ "$(basename $0)" = "pkg-load" -a -x "/etc/rc.d/pkgs/rc.$pkgname" ]; then
+	"/etc/rc.d/pkgs/rc.$pkgname" start
+fi

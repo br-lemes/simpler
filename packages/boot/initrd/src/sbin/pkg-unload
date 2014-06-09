@@ -1,0 +1,39 @@
+#!/bin/sh
+#
+# Removes a package from the system and stops the services if any
+
+. /lib/libscript
+
+help() {
+	echo "\
+Usage: $(basename "$0") <package>
+
+$DESCRIPTION." >&2
+	exit 1
+}
+
+[ "$#" != 1 -o "$1" = "-h" -o "$1" = "--help" ] && help
+
+if [ ! -f "$LRPKG/$1.list" ]; then
+	echo "Package '$1' not found." >&2
+	exit 1
+fi
+
+for info in $LRPKG/*.info; do
+	. "$info"
+	for pkg in $DEPENDENCIES; do
+		if [ "$pkg" = "$1" ]; then
+			echo "Package '$(basename $info .info)' depends on '$1'." >&2
+			exit 1
+		fi
+	done
+done
+
+[ -x "/etc/rc.d/pkgs/rc.$1" ] && "/etc/rc.d/pkgs/rc.$1" stop
+if fuser $(sed -e 's-^-/-' "$LRPKG/$1.list"); then
+	echo "Package '$1' is busy." >&2
+	exit 1
+else
+	rm $(sed -e 's-^-/-' "$LRPKG/$1.list")
+	sed -i '' -e "/^$1\$/d" "$LRPKG/packages"
+fi

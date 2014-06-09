@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# Loads your configuration files from the boot media
+
+. /lib/libscript
+
+help() {
+	echo "\
+Usage: $(basename "$0")
+
+$DESCRIPTION." >&2
+	exit 1
+}
+
+[ "$#" != 0 ] && help
+
+mt_boot || exit 1
+if ! diff -qrw /boot/config /etc/config > /dev/null 2>&1; then
+	rm -fr /etc/config > /dev/null 2>&1
+	cp -a /boot/config /etc/config > /dev/null 2>&1
+	find /etc/config -type f -name '*.cfg' -exec dos2unix {} \; \
+		-exec sh -c '[ "$(tail -c 1 {})" != "" ] && echo >> {}' \;
+	chmod go-r /etc/shadow
+fi
+umt_boot
