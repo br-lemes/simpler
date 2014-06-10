@@ -64,23 +64,20 @@ while read LINE || [ -n "$LINE" ]; do
 done < /etc/passwd
 
 # extract the packages
-if [ "$(echo /boot/packages/*.tgz)" != "/boot/packages/*.tgz" ]; then
-	for i in /boot/packages/*.tgz; do
-		logstart "Extracting '$(basename "$i" .tgz)' package"
-		pkg-extract "$i" 2>> "$LOGSTDERR"
-		logstatus
-	done
-fi
+for i in /boot/packages/*.tgz; do
+	[ ! -e "$i" ] && break
+	logstart "Extracting '$(basename "$i" .tgz)' package"
+	pkg-extract "$i" 2>> "$LOGSTDERR"
+	logstatus
+done
 
 # if isn't a Raspberry Pi (chroot)
 # enter into login shell, umount and exit
 if [ ! -b /dev/mmcblk0p1 ]; then
 	ash -l
-	if [ "/media/*" != "/media/*" ]; then
-		for i in /media/*; do
-			[ -d "$i" ] && umount "$i"
-		done
-	fi
+	for i in /media/*; do
+		[ -d "$i" ] && umount "$i" 2> /dev/null
+	done
 	umount /dev/pts
 	umount /sys
 	umount /proc

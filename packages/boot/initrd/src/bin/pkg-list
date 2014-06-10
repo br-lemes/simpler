@@ -13,11 +13,9 @@ $DESCRIPTION." >&2
 }
 
 if [ "$#" = 0 ]; then
-	if [ "$(echo $LRPKG/*.list)" != "$LRPKG/*.list" ]; then
-		for i in $LRPKG/*.list; do
-			basename "$i" .list
-		done
-	fi
+	for i in $LRPKG/*.list; do
+		[ -e "$i" ] && basename "$i" .list
+	done
 elif [ "$#" = 1 ]; then
 	case "$1" in
 		-h|--help) help;;
