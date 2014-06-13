@@ -3,3 +3,4 @@ src/bin/busybox
 src/lib/libc.so
 src/lib/libgcc_s.so.1
 src/lib/libstdc++.so*
+src/var/lib/lrpkg/
