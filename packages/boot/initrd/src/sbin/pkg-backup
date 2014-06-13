@@ -14,11 +14,16 @@ $DESCRIPTION." >&2
 
 [ "$#" != 1 -o "$1" = "-h" -o "$1" = "--help" ] && help
 
-if [ ! -f "/var/lib/lrpkg/$1.list" ]; then
+if [ ! -f "$LRPKG/$1.list" ]; then
 	echo "Package '$1' not found." >&2
 	exit 1
 fi
 
 mt_boot || exit 1
-tar czf "/boot/packages/$1.tgz" -T "/var/lib/lrpkg/$1.list" -C /
+if [ "$1" = "initrd" ]; then
+	cd /
+	cat "$LRPKG/initrd.list" | cpio -H newc -o | gzip > /boot/initrd.gz
+else
+	tar czf "/boot/packages/$1.tgz" -T "$LRPKG/$1.list" -C /
+fi
 umt_boot
