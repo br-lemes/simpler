@@ -34,6 +34,16 @@ cfg-load
 
 . /lib/libscript
 
+if [ -b /dev/mmcblk0p1 ]; then
+	for i in $MODULES; do
+		modprobe "$i" 2>> "$LOGSTDERR"
+	done
+	hostname "${HOSTNAME:-simpler}"
+	[ -n "$LOGGIN_HOST" ] && SYSLOG_OPTS="$SYSLOG_OPTS -L -R $LOGGIN_HOST"
+	syslogd $SYSLOG_OPTS
+	klogd
+fi
+
 # create mount points
 while read DEV MP TYPE || [ -n "$MP" ]; do
 	if ! echo "$DEV" | grep -q '^#'; then
@@ -63,6 +73,12 @@ while read LINE || [ -n "$LINE" ]; do
 	fi
 done < /etc/passwd
 
+if [ -b /dev/mmcblk0p1 ]; then
+	service network start 2>> "$LOGSTDERR" &
+	service udhcpd start 2>> "$LOGSTDERR" &
+	service ntpd start 2>> "$LOGSTDERR" &
+fi
+
 # extract the packages
 for i in /boot/packages/*.tgz; do
 	[ ! -e "$i" ] && break
@@ -85,23 +101,10 @@ if [ ! -b /dev/mmcblk0p1 ]; then
 	exit 0
 fi
 
-[ -n "$LOGGIN_HOST" ] && SYSLOG_OPTS="$SYSLOG_OPTS -L -R $LOGGIN_HOST"
-hostname "${HOSTNAME:-simpler}"
-syslogd $SYSLOG_OPTS
-klogd
-
-for i in $MODULES; do
-	modprobe "$i" 2>> "$LOGSTDERR"
+for i in /etc/rc.d/pkgs/rc.*; do
+	[ -x "$i" ] && "$i" start 2>> "$LOGSTDERR"
 done
 
-service network start 2>> "$LOGSTDERR" & # network must wait for eth0
-service udhcpd start 2>> "$LOGSTDERR"
-service ntpd start 2>> "$LOGSTDERR"
-
-touch /var/lib/lrpkg/packages
-while read i || [ -n "$i" ]; do
-	[ -x "/etc/rc.d/pkgs/rc.$i" ] && "/etc/rc.d/pkgs/rc.$i" start 2>> "$LOGSTDERR"
-done < /var/lib/lrpkg/packages
 . /etc/rc.local
 
 umount /boot
