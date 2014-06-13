@@ -19,6 +19,8 @@ $(grep ^#\ $SCRIPT "$0" | sed -e s/^#\ $SCRIPT\ //)." >&2
 
 [ "$#" != 1 -o "$1" = "-h" -o "$1" = "--help" ] && help
 
+mt_boot || exit 1
+
 # tries to guess package name and package file
 pkgname="$(basename $1 .tgz)"
 if [ -f "$1" ]; then
@@ -26,16 +28,17 @@ if [ -f "$1" ]; then
 elif [ -f "$1.tgz" ]; then
 	pkgfile="$1.tgz"
 else
-	mt_boot || exit 1
 	if [ -f "/boot/packages/$pkgname.tgz" ]; then
 		pkgfile="/boot/packages/$pkgname.tgz"
 	else
+		umt_boot
 		echo "Package '$pkgname' not found." >&2
 		exit 1
 	fi
 fi
 
 if [ -f "$LRPKG/$pkgname.list" ]; then
+	umt_boot
 	echo "Package '$pkgname' already $(echo $SCRIPT | sed -e 's/pkg-//')ed." >&2
 	exit 1
 fi
@@ -49,12 +52,14 @@ esac
 case "$PKGMODE" in
 	WHITE)
 		if ! echo " $PKGLIST" | tr "\n\t" " " | grep -q " $pkgname "; then
+			umt_boot
 			echo "Package '$pkgname' is not whitelisted." >&2
 			exit 1
 		fi
 		;;
 	BLACK)
 		if echo " $PKGLIST" | tr "\n\t" " " | grep -q " $pkgname "; then
+			umt_boot
 			echo "Package '$pkgname' is blacklisted." >&2
 			exit 1
 		fi
@@ -66,6 +71,7 @@ if [ "$SCRIPT" = "pkg-load" ]; then
 	. "$LRPKG/$pkgname.info"
 	for i in $DEPENDENCIES; do
 		if [ ! -f "$LRPKG/$i.list" ]; then
+			umt_boot
 			echo "Package '$pkgname' depends on '$i' not found." >&2
 			rm "$LRPKG/$pkgname.info"
 			exit 1
@@ -77,3 +83,4 @@ tar xzf "$pkgfile" -C /
 if [ "$SCRIPT" = "pkg-load" -a -x "/etc/rc.d/pkgs/rc.$pkgname" ]; then
 	"/etc/rc.d/pkgs/rc.$pkgname" start
 fi
+umt_boot
