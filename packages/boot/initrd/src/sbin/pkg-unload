@@ -35,5 +35,4 @@ if fuser $(sed -e 's-^-/-' "$LRPKG/$1.list"); then
 	exit 1
 else
 	rm $(sed -e 's-^-/-' "$LRPKG/$1.list")
-	sed -i '' -e "/^$1\$/d" "$LRPKG/packages"
 fi

@@ -6,12 +6,14 @@
 
 . /lib/libscript
 
+SCRIPT=$(basename "$0")
+
 help() {
 	echo "\
-Usage: $(basename "$0") <package>
+Usage: $SCRIPT <package>
 
 $DESCRIPTION
-$(grep ^#\ $(basename "$0") "$0" | sed -e s/^#\ $(basename "$0")\ //)." >&2
+$(grep ^#\ $SCRIPT "$0" | sed -e s/^#\ $SCRIPT\ //)." >&2
 	exit 1
 }
 
@@ -33,8 +35,8 @@ else
 	fi
 fi
 
-if grep -q "^$pkgname$" "$LRPKG/packages"; then
-	echo "Package '$pkgname' already loaded." >&2
+if [ -f "$LRPKG/$pkgname.list" ]; then
+	echo "Package '$pkgname' already $(echo $SCRIPT | sed -e 's/pkg-//')ed." >&2
 	exit 1
 fi
 
@@ -59,23 +61,19 @@ case "$PKGMODE" in
 		;;
 esac
 
-# presume it's already extracted if the package listing exists
-if [ ! -f "$LRPKG/$pkgname.list" ]; then
-	if [ "$(basename $0)" = "pkg-load" ]; then
-		tar xzf "$pkgfile" -C / "var/lib/lrpkg/$pkgname.info"
-		. "$LRPKG/$pkgname.info"
-		for i in $DEPENDENCIES; do
-			if ! grep -q "$i" "$LRPKG/packages"; then
-				echo "Package '$pkgname' depends on '$i' not found." >&2
-				rm "$LRPKG/$pkgname.info"
-				exit 1
-			fi
-		done
-	fi
-	tar xzf "$pkgfile" -C /
+if [ "$SCRIPT" = "pkg-load" ]; then
+	tar xzf "$pkgfile" -C / "var/lib/lrpkg/$pkgname.info"
+	. "$LRPKG/$pkgname.info"
+	for i in $DEPENDENCIES; do
+		if [ ! -f "$LRPKG/$i.list" ]; then
+			echo "Package '$pkgname' depends on '$i' not found." >&2
+			rm "$LRPKG/$pkgname.info"
+			exit 1
+		fi
+	done
 fi
+tar xzf "$pkgfile" -C /
 
-echo "$pkgname" >> "$LRPKG/packages"
-if [ "$(basename $0)" = "pkg-load" -a -x "/etc/rc.d/pkgs/rc.$pkgname" ]; then
+if [ "$SCRIPT" = "pkg-load" -a -x "/etc/rc.d/pkgs/rc.$pkgname" ]; then
 	"/etc/rc.d/pkgs/rc.$pkgname" start
 fi
