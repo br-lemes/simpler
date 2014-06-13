@@ -14,7 +14,17 @@ all: ../../../boot/initrd.gz
 	@ln -f $< $@
 
 initrd.gz: $(subst *,,$(PKGCLEAN))
-	@cd src && find . | cpio --quiet -H newc -o --owner=0:0 | \
+	@mkdir -p src/var/lib/lrpkg
+	@printf "\
+DEPENDENCIES='$(PKGDEPENDENCIES)'\n\
+DESCRIPTION='$(PKGDESC)'\n\
+CATEGORIES='$(PKGCATEGORIES)'\n\
+VERSION='$(PKGVERSION)'\n\
+BUILD='$$(date +%F-%Z)'\n" > src/var/lib/lrpkg/initrd.info
+	@touch src/var/lib/lrpkg/initrd.list
+	@find src/ -type f -o -type l | sed "s,src/,," > src/var/lib/lrpkg/initrd.list
+	@cd src && cat var/lib/lrpkg/initrd.list | \
+		cpio --quiet -H newc -o --owner=0:0 | \
 		gzip -9 -n > ../initrd.gz
 
 src/bin/busybox: ../busybox/busybox-*/busybox
