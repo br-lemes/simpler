@@ -4,7 +4,7 @@ INITRAMFS=../linux/usr/initramfs_data.cpio.gz
 
 all:
 	@$(MAKE) -C $(INITRD)
-	@if [ ! -e $(INITRAMFS) ]; then $(MAKE) -C ../packages/boot/kernel; fi
+	@if [ ! -e $(INITRAMFS) ]; then $(MAKE) -C ../kernel; fi
 	@mkdir -p build
 	@$(MAKE) -s build
 
