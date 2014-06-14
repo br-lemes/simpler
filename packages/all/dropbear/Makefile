@@ -20,13 +20,13 @@ src/usr/bin/dropbearmulti: $(PKGPATH)/dropbearmulti
 	@cp -a $< $@
 
 $(PKGPATH)/Makefile:
-	@$(MAKE) -C ../../libraries/zlib
+	@$(MAKE) -C ../zlib
 	@$(MAKE) $(PKGPATH)
 	@cd $(PKGPATH) && ./configure \
 		--prefix=/usr \
 		--build=$(HOST) \
 		--host=$(TARGET) \
-		--with-zlib=$(shell readlink -f ../../libraries/zlib/zlib-*/)
+		--with-zlib=$(shell readlink -f ../zlib/zlib-*/)
 	
 $(PKGPATH)/dropbearmulti: $(PKGPATH)/Makefile
 	@$(MAKE) -C $(PKGPATH) SCPPROGRESS=1 MULTI=1 PROGRAMS="dropbear dbclient dropbearkey dropbearconvert scp"

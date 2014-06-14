@@ -5,7 +5,7 @@ LIBC=/opt/cross/$(TARGET)/$(TARGET)/lib/libc.so
 LIBGCC=/opt/cross/$(TARGET)/$(TARGET)/lib/libgcc_s.so.1
 LIBSTDCXX=/opt/cross/$(TARGET)/$(TARGET)/lib/libstdc++.so
 
-PKGCLEAN=src/bin/busybox src/lib/libc.so src/lib/libgcc_s.so.1 \
+PKGCLEAN=initrd.gz src/bin/busybox src/lib/libc.so src/lib/libgcc_s.so.1 \
 	src/lib/libstdc++.so*
 
 all: ../../../boot/initrd.gz

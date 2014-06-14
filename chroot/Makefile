@@ -1,5 +1,5 @@
 
-INITRD=../packages/boot/initrd
+INITRD=../packages/all/initrd
 INITRAMFS=../linux/usr/initramfs_data.cpio.gz
 
 all:
