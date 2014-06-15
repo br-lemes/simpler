@@ -140,4 +140,13 @@ $(PKGFILE):
 	@echo "$(PKGMD5SUM)  $@" | md5sum -c || $(RM) -- $@
 endif
 
-.PHONY: all default show version clean binclean downclean pack pack-dev md5sum
+categories:
+ifdef PKGCATEGORIES
+	@for i in $(PKGCATEGORIES); do \
+		mkdir -p ../../$$i; \
+		ln -sf ../../Makefile ../../$$i; \
+		ln -sf ../all/$(PKGNAME) ../../$$i; \
+	done
+endif
+
+.PHONY: all default show version clean binclean downclean pack pack-dev md5sum categories

@@ -3,23 +3,34 @@
 PARENT=$(shell basename $$(dirname $$PWD))
 CURDIR=$(shell basename $$PWD)
 
-all show version clean binclean downclean md5sum: $(wildcard */)
+all show version clean binclean downclean md5sum categories:
 # prints a nice header if inside a category
-ifeq ($(PARENT),packages)
-	@N=$$(expr 45 - length $(PARENT):$(CURDIR)); \
-		printf "%$$(expr $$N / 2)s" | tr " " "*"; \
-		printf " $(PARENT):$(CURDIR) "; \
-		printf "%$$(expr $$N / 2)s\n" | tr " " "*"
-endif
+	@if [ "$(PARENT)" = "packages" \
+		-a "$(CURDIR)" != "all" \
+		-a "$@" != "categories" ]; then \
+			N=$$(expr 45 - length $(PARENT):$(CURDIR)); \
+			printf "%$$(expr $$N / 2)s" | tr " " "*"; \
+			printf " $(PARENT):$(CURDIR) "; \
+			printf "%$$(expr $$N / 2)s\n" | tr " " "*"; \
+	fi
 # descends into the categories/packages subdirectory
-	@[ "$@" != "all" ] && FLAGS=-s; \
-		for i in $(wildcard */); do \
+	@[ "$@" != "all" -a -z "$(DEBUG)" ] && FLAGS=-s; \
+		for i in */; do \
 			if [ "$$i" = "packages/" \
+				-o "$$i" = "kernel/" \
 				-o "$(PARENT)" = "packages" \
 				-o "$(CURDIR)" = "packages" ]; then \
-					$(MAKE) $$FLAGS -C $$i $@; \
+					if [ "$$i" != "all/" -o "$@" = "categories" ]; then \
+						$(MAKE) $$FLAGS -C $$i $@; \
+					fi; \
 			fi; \
 		done
+# if "clean" is the target also cleans the categories
+	@if [ "$@" = "clean" -a "$(CURDIR)" = "packages" ]; then \
+		for i in */; do \
+			[ "$$i" != "all/" ] && rm -rf "$$i"; \
+		done; \
+	fi
 
 ifeq ($(CURDIR),simpler)
 FIRMWARE=https://raw.githubusercontent.com/raspberrypi/firmware/master/boot
@@ -33,4 +44,4 @@ firmware:
 
 endif
 
-.PHONY: all show version clean binclean downclean md5sum
+.PHONY: all show version clean binclean downclean md5sum categories
