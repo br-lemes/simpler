@@ -21,6 +21,8 @@ clean:
 binclean:
 	@$(MAKE) -C ../linux mrproper
 
+downclean: binclean
+
 nconfig menuconfig xconfig gconfig: ../linux/.config
 	@$(MAKE) -C ../linux ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- $@
 
