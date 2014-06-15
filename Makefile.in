@@ -140,6 +140,11 @@ $(PKGFILE):
 	@echo "$(PKGMD5SUM)  $@" | md5sum -c || $(RM) -- $@
 endif
 
+$(PKGDEPENDENCIES):
+	@for i in $@; do \
+		$(MAKE) -C "../$$i"; \
+	done
+
 categories:
 ifdef PKGCATEGORIES
 	@for i in $(PKGCATEGORIES); do \
