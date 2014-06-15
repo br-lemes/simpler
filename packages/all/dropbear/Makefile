@@ -1,13 +1,13 @@
 
 PKGNAME=dropbear
-PKGVERSION=2013.62
+PKGVERSION=2014.63
 PKGFEXT=bz2
 PKGDEPENDENCIES=zlib
 PKGCATEGORIES=network
 PKGDESC=Dropbear is a relatively small SSH server and client 
 PKGSITE=https://matt.ucc.asn.au/dropbear/dropbear.html
 PKGDOWN=https://matt.ucc.asn.au/dropbear/
-PKGMD5SUM=ca2c7932a1399cf361f795aaa3843998
+PKGMD5SUM=7066bb9a2da708f3ed06314fdc9c47fd
 
 PKGBUILD=src/usr/bin/dropbearmulti
 PKGCLEAN=$(PKGBUILD)
@@ -19,8 +19,7 @@ all: $(PKGBOOT)
 src/usr/bin/dropbearmulti: $(PKGPATH)/dropbearmulti
 	@cp -a $< $@
 
-$(PKGPATH)/Makefile:
-	@$(MAKE) -C ../zlib
+$(PKGPATH)/Makefile: $(PKGDEPENDENCIES)
 	@$(MAKE) $(PKGPATH)
 	@cd $(PKGPATH) && ./configure \
 		--prefix=/usr \
