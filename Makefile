@@ -28,7 +28,7 @@ all show version clean binclean downclean md5sum categories:
 # if "clean" is the target also cleans the categories
 	@if [ "$@" = "clean" -a "$(CURDIR)" = "packages" ]; then \
 		for i in */; do \
-			[ "$$i" != "all/" ] && rm -rf "$$i"; \
+			if [ "$$i" != "all/" ]; then rm -rf "$$i"; fi; \
 		done; \
 	fi
 

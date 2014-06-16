@@ -4,7 +4,9 @@ dir /dev                   0755 0 0
 nod /dev/console           0640 0 0 c 5 1
 dir /dev/pts               0755 0 0
 dir /etc                   0755 0 0
+dir /etc/init.d            0755 0 0
 dir /etc/opt               0755 0 0
+dir /etc/rc.d              0755 0 0
 dir /lib                   0755 0 0
 dir /media                 0755 0 0
 dir /mnt                   0755 0 0
