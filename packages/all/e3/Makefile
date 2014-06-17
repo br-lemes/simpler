@@ -41,7 +41,3 @@ $(EMULAYER_O): $(EMULAYER_S)
 
 pack:
 	@if [ ! -L pack ]; then ln -sf src pack; fi
-
-#~ $(E3)
-#~ @mkdir -p pack/usr/bin
-#~ @cp -a $< pack/usr/bin
