@@ -106,11 +106,11 @@ $(PKGNAME).tgz $(PKGNAME)-dev.tgz: $(PKGBUILD)
 	@if [ "$@" = "$(PKGNAME)-dev.tgz" ]; then \
 		PKGDEV=-dev; \
 		LRPKG=pack-dev/var/lib/lrpkg; \
-		$(MAKE) pack-dev; \
+		$(MAKE) pack-dev || exit 1; \
 	else \
 		PKGDEV=; \
 		LRPKG=pack/var/lib/lrpkg; \
-		$(MAKE) pack; \
+		$(MAKE) pack || exit 1; \
 	fi; \
 	mkdir -p $$LRPKG; \
 	printf "\

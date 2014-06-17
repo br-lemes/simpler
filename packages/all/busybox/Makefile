@@ -11,9 +11,9 @@ include ../../../Makefile.in
 
 all: $(PKGPATH)/busybox
 
-$(PKGPATH)/.config:
+$(PKGPATH)/.config: config-busybox
 	@$(MAKE) $(PKGPATH)
-	@cp config-busybox $@
+	@cp $< $@
 
 $(PKGPATH)/busybox: $(PKGPATH)/.config
 	@ARCH="$(ARCH)" CROSS_COMPILE="$(TARGET)-" $(MAKE) -C $(PKGPATH) busybox
@@ -21,4 +21,7 @@ $(PKGPATH)/busybox: $(PKGPATH)/.config
 menuconfig: $(PKGPATH)/.config
 	@ARCH="$(ARCH)" CROSS_COMPILE="$(TARGET)-" $(MAKE) -C $(PKGPATH) menuconfig
 
-.PHONY: menuconfig
+pack:
+	$(error Not a package)
+
+.PHONY: menuconfig pack

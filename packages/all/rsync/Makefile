@@ -12,10 +12,10 @@ PKGMD5SUM=3be148772a33224771a8d4d2a028b132
 PKGBUILD=$(PKGPATH)/rsync
 PKGCLEAR=$(PKGBUILD)
 
+include ../../../Makefile.in
+
 export CFLAGS=-I$(shell readlink -f ../zlib/zlib-*/)
 export LDFLAGS=-L$(shell readlink -f ../zlib/zlib-*/)
-
-include ../../../Makefile.in
 
 all: $(PKGBOOT)
 

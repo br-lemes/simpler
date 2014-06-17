@@ -1,6 +1,7 @@
 
 PKGNAME=modules
 PKGVERSION=$(shell $(MAKE) -sC ../../../linux kernelversion)
+PKGCATEGORIES=system
 PKGDESC=The Linux Kernel
 PKGSITE=https://github.com/raspberrypi/linux
 
@@ -10,8 +11,8 @@ PKGBUILD=$(shell readlink -f pack)
 
 all: $(PKGBOOT)
 
-../../../linux/.config:
-	@cp ../kernel/config-kernel $@
+../../../linux/.config: config-kernel
+	@cp $< $@
 
 pack: ../../../linux/.config
 	@$(MAKE) -C ../../../linux ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- \
