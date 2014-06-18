@@ -1,0 +1,5 @@
+src/usr/bin/smbpasswd
+src/usr/sbin/nmbd
+src/usr/sbin/smbd
+src/usr/lib/*
+src/var/lib/lrpkg/

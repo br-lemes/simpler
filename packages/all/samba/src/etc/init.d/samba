@@ -1,0 +1,57 @@
+#!/bin/sh
+#
+# Samba init script
+#
+# Config from master.cfg
+# Default SAMBA_ENABLED=YES
+
+. /lib/libscript
+
+case "$SAMBA_ENABLED" in
+	[Nn]|[Nn][Oo]) SAMBA_ENABLED=NO;;
+	*) SAMBA_ENABLED=YES
+esac
+SMBDPID=/var/run/smbd.pid
+NMBDPID=/var/run/nmbd.pid
+
+checkcfgdir samba
+checkcfgdir samba/private
+checkcfgfile samba/smb.cfg
+
+start() {
+	if [ -f $SMBDPID -a -f $NMBDPID ]; then
+		echo "The samba service is already running."
+		exit 1
+	fi
+	if [ "$SAMBA_ENABLED" = "NO" ]; then
+		echo "The samba service is disabled."
+		exit 1
+	fi
+	smbd -D
+	nmbd -D
+}
+
+stop() {
+	if [ -f $SMBDPID -a -f $NMBDPID ]; then
+		kill $(cat $SMBDPID) $(cat $NMBDPID)
+	else
+		echo "The samba service isn't running."
+		exit 1
+	fi
+}
+
+status() {
+	if [ -f $SMBDPID -a -f $NMBDPID ]; then
+		echo -e "samba\t\tYES"
+	else
+		if [ "$SAMBA_ENABLED" = "NO" ]; then
+			echo -e "samba\t\tDISABLED"
+			exit 1
+		else
+			echo -e "samba\t\tNO"
+			exit 1
+		fi
+	fi
+}
+
+srvargs "$@"

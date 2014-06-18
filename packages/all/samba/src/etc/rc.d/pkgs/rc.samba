@@ -1,0 +1,13 @@
+#!/bin/sh
+
+. /lib/libscript
+
+start() {
+	service samba start
+}
+
+stop() {
+	service samba stop
+}
+
+pkgargs "$@"
