@@ -25,7 +25,7 @@ $(LIBFORM) $(LIBMENU) $(LIBNCURSES) $(LIBPANEL): $(PKGPATH)/Makefile
 
 $(PKGPATH)/Makefile:
 	@$(MAKE) $(PKGPATH)
-	@sed -i 's/linux-newlib/linux-musl/' $(PKGPATH)/config.sub
+	@$(SEDMUSL) $(PKGPATH)/config.sub
 	@cd $(PKGPATH) && ./configure \
 		--prefix=/usr \
 		--build=$(SRP_HOST) \

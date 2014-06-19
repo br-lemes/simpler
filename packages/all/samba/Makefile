@@ -81,7 +81,7 @@ $(SMBPASSWD):
 
 $(MAKEFILE):
 	@$(MAKE) $(PKGPATH)
-	@sed -i 's/linux-newlib/linux-musl/' $(PKGPATH)/source3/config.sub
+	@$(SEDMUSL) $(PKGPATH)/source3/config.sub
 	@cd $(PKGPATH)/source3 && ./configure \
 		--prefix=/usr \
 		--build=$(HOST) \

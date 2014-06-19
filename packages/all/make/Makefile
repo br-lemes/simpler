@@ -24,7 +24,7 @@ $(PKGPATH)/make: $(PKGPATH)/Makefile
 
 $(PKGPATH)/Makefile:
 	@$(MAKE) $(PKGPATH)
-	@sed -i 's/linux-newlib/linux-musl/' $(PKGPATH)/config/config.sub
+	@$(SEDMUSL) $(PKGPATH)/config/config.sub
 	@cd $(PKGPATH) && ./configure \
 		--prefix=/usr \
 		--build=$(HOST) \

@@ -25,7 +25,7 @@ $(PKGPATH)/src/nano: $(PKGPATH)/Makefile
 $(PKGPATH)/Makefile:
 	@$(MAKE) -C ../ncurses
 	@$(MAKE) $(PKGPATH)
-	@sed -i 's/linux-newlib/linux-musl/' $(PKGPATH)/config.sub
+	@$(SEDMUSL) $(PKGPATH)/config.sub
 	@cd $(PKGPATH) && ./configure \
 		--prefix=/usr \
 		--build=$(SRP_HOST) \
