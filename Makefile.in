@@ -118,7 +118,7 @@ DEPENDENCIES='$(PKGDEPENDENCIES)'\n\
 DESCRIPTION='$(PKGDESC)'\n\
 CATEGORIES='$(PKGCATEGORIES)'\n\
 VERSION='$(PKGVERSION)'\n\
-BUILD='$$(date +%F-%Z)'\n" > $$LRPKG/$(PKGNAME)$$PKGDEV.info \
+BUILD='$$(date +%F-%Z)'\n" > $$LRPKG/$(PKGNAME)$$PKGDEV.info; \
 	touch $$LRPKG/$(PKGNAME)$$PKGDEV.list; \
 	find pack$$PKGDEV/ -type f -o -type l | sed "s,pack$$PKGDEV/,," > $$LRPKG/$(PKGNAME)$$PKGDEV.list; \
 	tar czf $@ -C pack$$PKGDEV --owner=root --group=root -T $$LRPKG/$(PKGNAME)$$PKGDEV.list
