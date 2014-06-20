@@ -18,7 +18,7 @@ ARCH=arm
 ARM_ARCH=armv6zk
 
 # often used workaround to recognize musl triple
-SEDMUSL=sed -i -e 's/linux-newlib/linux-musl/'
+SEDMUSL=sed -i -e 's/linux-uclibc/linux-musl/'
 
 export LC_ALL=POSIX
 export CFLAGS=

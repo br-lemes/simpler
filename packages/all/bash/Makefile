@@ -6,7 +6,7 @@ PKGCATEGORIES=utilities
 PKGDESC=Bourne Again Shell
 PKGSITE=http://ftp.gnu.org/gnu/bash/
 PKGDOWN=ftp://ftp.astron.com/pub/file/
-PKGMD5SUM=e3526f59023f3f7d1ffa4d541335edab
+PKGMD5SUM=81348932d5da294953e15d4814c74dd1
 
 PKGBUILD=$(PKGPATH)/bash
 
