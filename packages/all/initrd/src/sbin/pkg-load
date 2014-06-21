@@ -67,7 +67,12 @@ case "$PKGMODE" in
 esac
 
 if [ "$SCRIPT" = "pkg-load" ]; then
-	tar xzf "$pkgfile" -C / "var/lib/lrpkg/$pkgname.info"
+	tar xzf "$pkgfile" -C / "var/lib/lrpkg/$pkgname.info" 2> /dev/null
+	if [ ! -f "$LRPKG/$pkgname.info" ]; then
+		umt_boot
+		echo "$LRPKG/$pkgname.info not found." >&2
+		exit 1
+	fi
 	. "$LRPKG/$pkgname.info"
 	for i in $DEPENDENCIES; do
 		if [ ! -f "$LRPKG/$i.list" ]; then
