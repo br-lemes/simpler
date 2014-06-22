@@ -71,10 +71,8 @@ endif
 
 # shows package version and download site
 version:
-ifdef PKGNAME
-ifdef PKGVERSION
-	@printf "  %-20s%s\n" "$(PKGNAME)-$(PKGVERSION)" "$(PKGSITE)"
-endif
+ifdef PKGPATH
+	@printf "  %-20s%s\n" "$(PKGPATH)" "$(PKGSITE)"
 endif
 
 # cleans generated or temporary files
@@ -94,13 +92,6 @@ downclean: binclean
 
 ifdef PKGNAME
 
-# hadlinks packages to the boot subdirectory
-PKGBOOT=../../../boot/packages/$(PKGNAME).tgz
-../../../boot/packages:
-	@mkdir -p $@
-$(PKGBOOT): $(PKGNAME).tgz ../../../boot/packages
-	@ln -f $< $@
-
 # generates a package with version and list info
 %.tgz: LRPKG=$</var/lib/lrpkg
 %.tgz: %.d
@@ -114,6 +105,7 @@ BUILD='$$(date +%F-%Z)'\n" > $(LRPKG)/$*.info
 	@touch $(LRPKG)/$*.list
 	@find $</ -type f -o -type l | sed "s,$</,," > $(LRPKG)/$*.list
 	@tar czf $@ -C $</ --owner=root --group=root -T $(LRPKG)/$*.list
+	@ln -f $@ ../../../boot/packages/$@
 endif
 
 # extracts a tarball and apply a patch if any
