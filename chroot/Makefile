@@ -15,12 +15,14 @@ build: qemu-arm-static
 ifeq ($(shell id -u), 0)
 	@mount -t tmpfs tmpfs $@
 	@cd $@ && gunzip -c ../$(INITRAMFS) | cpio -i --quiet
-	@mkdir -p $@/boot
+	@mkdir -p $@/boot $@/opt/simpler
 	@mount --bind ../boot $@/boot
+	@mount --bind .. $@/opt/simpler
 	@cp -a --no-preserve=ownership $(INITRD)/src/* $@
 	@install -D qemu-arm-static $@/usr/bin/qemu-arm-static
 	@-chroot $@ /etc/rc.d/rc.sysinit
 	@-umount $@/boot
+	@-umount $@/opt/simpler
 	@umount $@
 else
 	@sudo $(MAKE) $@
