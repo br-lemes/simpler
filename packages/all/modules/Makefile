@@ -7,14 +7,12 @@ PKGSITE=https://github.com/raspberrypi/linux
 
 include ../../../Makefile.in
 
-PKGBUILD=$(shell readlink -f pack)
-
 all: $(PKGBOOT)
 
-../../../linux/.config: config-kernel
+../../../linux/.config: ../../../kernel/config-kernel
 	@cp $< $@
 
-pack: ../../../linux/.config
+$(PKGNAME).d: ../../../linux/.config
 	@$(MAKE) -C ../../../linux ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- \
-		INSTALL_MOD_PATH=$(PWD)/pack modules modules_install
-	@find pack -type l -delete
+		INSTALL_MOD_PATH=$(PWD)/$@ modules modules_install
+	@find $@ -type l -delete

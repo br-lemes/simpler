@@ -12,21 +12,22 @@ PKGBUILD=$(PKGPATH)/src/haserl
 
 include ../../../Makefile.in
 
-export LUA_CFLAGS=-I$(shell readlink -f ../lua52/lua-*/src)
-export LUA_LIBS=-L$(shell readlink -f ../lua52/lua-*/src) -llua
-export LD_LIBRARY_PATH=$(shell readlink -f ../lua52/lua-*/src)
+export LUA_CFLAGS=-I$(PWD)/../lua52/.../src/
+export LUA_LIBS=-L$(PWD)/../lua52/.../src/ -llua
+export LD_LIBRARY_PATH=$(PWD)/../lua52/.../src/
 
 all: $(PKGBOOT)
 
-$(PKGPATH)/src/haserl: $(PKGPATH)/Makefile
+$(PKGBUILD): $(PKGPATH)/Makefile
 	@$(MAKE) -C $(PKGPATH)
 	@$(STRIP) $@
 
 $(PKGPATH)/Makefile:
+	@$(MAKE) -C ../lua52
 	@$(MAKE) $(PKGPATH)
 	@cd $(PKGPATH) && ./configure --with-lua --host=$(TARGET)
 
-pack:
+$(PKGNAME).d: $(PKGBUILD)
 	@$(RM) -r $@
 	@mkdir -p $@/usr/bin
-	@cp -a $(PKGPATH)/src/haserl $@/usr/bin
+	@cp -a $< $@/usr/bin

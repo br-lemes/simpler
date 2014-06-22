@@ -17,16 +17,16 @@ PKGBUILD=$(LIBVORBIS) $(LIBVORBISFILE) $(LIBVORBISENC)
 
 include ../../../Makefile.in
 
-export OGG_CFLAGS=-I$(shell readlink -f ../libogg/libogg-*/include)
-export OGG_LIBS=-L$(shell readlink -f ../libogg/libogg-*/src/.libs) -logg
+export OGG_CFLAGS=-I$(PWD)/../libogg/.../include/
+export OGG_LIBS=-L$(PWD)/../libogg/.../src/.libs/ -logg
 
-all: $(PKGBOOT)
+all: $(PKGNAME).tgz $(PKGNAME)file.tgz $(PKGNAME)enc.tgz
 
 $(PKGBUILD): $(PKGPATH)/Makefile
 	@$(MAKE) -C $(PKGPATH)
 	@$(STRIP) $@
 
-$(PKGPATH)/Makefile: $(PKGDEPENDENCIES)
+$(PKGPATH)/Makefile:
 	@$(MAKE) $(PKGPATH)
 	@$(SEDMUSL) $(PKGPATH)/config.sub
 	@cd $(PKGPATH) && ./configure \
@@ -36,7 +36,7 @@ $(PKGPATH)/Makefile: $(PKGDEPENDENCIES)
 		--disable-docs \
 		--disable-examples
 
-pack:
+$(PKGNAME).d $(PKGNAME)file.d $(PKGNAME)enc.d: $(PKGBUILD)
 	@$(RM) -r $@
 	@mkdir -p $@/usr/lib
-	@cp -a $(PKGPATH)/lib/.libs/$(PKGNAME)*.so* $@/usr/lib
+	@cp -a $(PKGPATH)/lib/.libs/$(basename $@).so* $@/usr/lib

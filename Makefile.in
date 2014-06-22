@@ -79,13 +79,13 @@ endif
 
 # cleans generated or temporary files
 clean:
-	@echo $(RM) -r -- $(PKGCLEAN) $(PKGNAME).tgz $(PKGNAME)-dev.tgz *.part pack pack-dev
-	@$(RM) -r -- $(PKGCLEAN) $(PKGNAME).tgz $(PKGNAME)-dev.tgz *.part pack pack-dev
+	@echo $(RM) -r -- $(PKGCLEAN) *.d *.tgz *.part
+	@$(RM) -r -- $(PKGCLEAN) *.d *.tgz *.part
 
 # cleans build files
 binclean: clean
 	@echo $(RM) -r -- $(PKGBCLEAN) $(PKGPATH)
-	@$(RM) -r -- $(PKGBCLEAN) $(PKGPATH)
+	@$(RM) -r -- $(PKGBCLEAN) $(PKGPATH) ...
 
 # cleans downloaded files
 downclean: binclean
@@ -102,26 +102,18 @@ $(PKGBOOT): $(PKGNAME).tgz ../../../boot/packages
 	@ln -f $< $@
 
 # generates a package with version and list info
-$(PKGNAME).tgz $(PKGNAME)-dev.tgz: $(PKGBUILD)
-	@if [ "$@" = "$(PKGNAME)-dev.tgz" ]; then \
-		PKGDEV=-dev; \
-		LRPKG=pack-dev/var/lib/lrpkg; \
-		$(MAKE) pack-dev || exit 1; \
-	else \
-		PKGDEV=; \
-		LRPKG=pack/var/lib/lrpkg; \
-		$(MAKE) pack || exit 1; \
-	fi; \
-	mkdir -p $$LRPKG; \
-	printf "\
+%.tgz: LRPKG=$</var/lib/lrpkg
+%.tgz: %.d
+	@mkdir -p $(LRPKG)
+	@printf "\
 DEPENDENCIES='$(PKGDEPENDENCIES)'\n\
 DESCRIPTION='$(PKGDESC)'\n\
 CATEGORIES='$(PKGCATEGORIES)'\n\
 VERSION='$(PKGVERSION)'\n\
-BUILD='$$(date +%F-%Z)'\n" > $$LRPKG/$(PKGNAME)$$PKGDEV.info; \
-	touch $$LRPKG/$(PKGNAME)$$PKGDEV.list; \
-	find pack$$PKGDEV/ -type f -o -type l | sed "s,pack$$PKGDEV/,," > $$LRPKG/$(PKGNAME)$$PKGDEV.list; \
-	tar czf $@ -C pack$$PKGDEV --owner=root --group=root -T $$LRPKG/$(PKGNAME)$$PKGDEV.list
+BUILD='$$(date +%F-%Z)'\n" > $(LRPKG)/$*.info
+	@touch $(LRPKG)/$*.list
+	@find $</ -type f -o -type l | sed "s,$</,," > $(LRPKG)/$*.list
+	@tar czf $@ -C $</ --owner=root --group=root -T $(LRPKG)/$*.list
 endif
 
 # extracts a tarball and apply a patch if any
@@ -131,7 +123,9 @@ $(PKGPATH): $(PKGFILE)
 ifdef PKGPATCH
 	@cd $@ && patch -Np1 -i ../$(PKGPATCH)
 endif
+	@ln -s $@ ...
 	@touch $@
+	@$(MAKE) $(PKGDEPENDENCIES)
 
 # downloads a tarball
 $(PKGFILE):
@@ -154,4 +148,4 @@ ifdef PKGCATEGORIES
 	done
 endif
 
-.PHONY: all default show version clean binclean downclean pack pack-dev md5sum categories
+.PHONY: all default show version clean binclean downclean md5sum categories

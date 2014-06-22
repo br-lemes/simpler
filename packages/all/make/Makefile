@@ -14,11 +14,11 @@ include ../../../Makefile.in
 
 all: $(PKGBOOT)
 
-pack:
-	@mkdir -p pack/usr/bin
-	@cp -a $(PKGPATH)/make pack/usr/bin
+$(PKGNAME).d: $(PKGBUILD)
+	@mkdir -p $@/usr/bin
+	@cp -a $< $@/usr/bin
 
-$(PKGPATH)/make: $(PKGPATH)/Makefile
+$(PKGBUILD): $(PKGPATH)/Makefile
 	@$(MAKE) -C $(PKGPATH)
 	@$(STRIP) $@
 

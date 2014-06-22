@@ -16,20 +16,20 @@ include ../../../Makefile.in
 
 all: $(PKGBOOT)
 
-src/usr/bin/dropbearmulti: $(PKGPATH)/dropbearmulti
+$(PKGBUILD): $(PKGPATH)/dropbearmulti
 	@cp -a $< $@
 
-$(PKGPATH)/Makefile: $(PKGDEPENDENCIES)
+$(PKGPATH)/Makefile:
 	@$(MAKE) $(PKGPATH)
 	@cd $(PKGPATH) && ./configure \
 		--prefix=/usr \
 		--build=$(HOST) \
 		--host=$(TARGET) \
-		--with-zlib=$(shell readlink -f ../zlib/zlib-*/)
-	
+		--with-zlib=$(PWD)/../zlib/.../
+
 $(PKGPATH)/dropbearmulti: $(PKGPATH)/Makefile
 	@$(MAKE) -C $(PKGPATH) SCPPROGRESS=1 MULTI=1 PROGRAMS="dropbear dbclient dropbearkey dropbearconvert scp"
 	@$(STRIP) $@
 
-pack:
-	@if [ ! -L pack ]; then ln -sf src pack; fi
+$(PKGNAME).d: $(PKGBUILD)
+	@if [ ! -L $@ ]; then ln -sf src $@; fi

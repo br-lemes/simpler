@@ -14,7 +14,7 @@ include ../../../Makefile.in
 
 all: $(PKGBOOT)
 
-$(PKGPATH)/bash: $(PKGPATH)/Makefile
+$(PKGBUILD): $(PKGPATH)/Makefile
 	@$(MAKE) -C $(PKGPATH)
 	@$(STRIP) $@
 
@@ -25,7 +25,7 @@ $(PKGPATH)/Makefile:
 		--host=$(TARGET) \
 		--with-included-gettext
 
-pack:
+$(PKGNAME).d: $(PKGBUILD)
 	@$(RM) -r $@
 	@mkdir -p $@/usr/bin
 	@cp -a $(PKGPATH)/bash $@/usr/bin

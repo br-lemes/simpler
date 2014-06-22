@@ -14,7 +14,7 @@ include ../../../Makefile.in
 
 all: $(PKGBOOT)
 
-$(PKGPATH)/src/.libs/$(PKGNAME).so.0.8.1: $(PKGPATH)/Makefile
+$(PKGBUILD): $(PKGPATH)/Makefile
 	@$(MAKE) -C $(PKGPATH)
 	@$(STRIP) $@
 
@@ -26,7 +26,7 @@ $(PKGPATH)/Makefile:
 		--host=$(TARGET) \
 		--disable-static
 
-pack:
+$(PKGNAME).d: $(PKGBUILD)
 	@$(RM) -r $@
 	@mkdir -p $@/usr/lib
 	@cp -a $(PKGPATH)/src/.libs/$(PKGNAME).so* $@/usr/lib

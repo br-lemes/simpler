@@ -8,17 +8,16 @@ PKGSITE=http://www.gnu.org/software/binutils/
 PKGDOWN=http://ftp.gnu.org/gnu/binutils/
 PKGMD5SUM=e0f71a7b2ddab0f8612336ac81d9636b
 
-PKGBUILD=build
 PKGBCLEAN=build
 
 include ../../../Makefile.in
 
 all: $(PKGBOOT)
 
-pack:
-	@$(MAKE) -C build DESTDIR=$(PWD)/pack install
-	@$(STRIP) pack/usr/bin/*
-	@$(RM) -r pack/usr/include pack/usr/lib pack/usr/share
+$(PKGNAME).d: build
+	@$(MAKE) -C build DESTDIR=$(PWD)/$@ install
+	@$(STRIP) $@/usr/bin/*
+	@$(RM) -r $@/usr/include $@/usr/lib $@/usr/share
 
 build: build/Makefile
 	@$(MAKE) -C build

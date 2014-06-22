@@ -13,16 +13,16 @@ PKGBUILD=$(PKGPATH)/.libs/$(PKGNAME).so.0.3.0
 
 include ../../../Makefile.in
 
-export CFLAGS=-I$(shell readlink -f ../zlib/zlib-*/)
-export LDFLAGS=-L$(shell readlink -f ../zlib/zlib-*/)
+export CFLAGS=-I$(PWD)/../zlib/.../
+export LDFLAGS=-L$(PWD)/../zlib/.../
 
 all: $(PKGBOOT)
 
-$(PKGPATH)/.libs/$(PKGNAME).so.0.3.0: $(PKGPATH)/Makefile
+$(PKGBUILD): $(PKGPATH)/Makefile
 	@$(MAKE) -C $(PKGPATH)
 	@$(STRIP) $@
 
-$(PKGPATH)/Makefile: $(PKGDEPENDENCIES)
+$(PKGPATH)/Makefile:
 	@$(MAKE) $(PKGPATH)
 	@$(SEDMUSL) $(PKGPATH)/config.sub
 	@cd $(PKGPATH) && ./configure \
@@ -31,7 +31,7 @@ $(PKGPATH)/Makefile: $(PKGDEPENDENCIES)
 		--disable-static \
 		--disable-debugging
 
-pack:
+$(PKGNAME).d: $(PKGBUILD)
 	@$(RM) -r $@
 	@mkdir -p $@/usr/lib
 	@cp -a $(PKGPATH)/.libs/$(PKGNAME).so* $@/usr/lib

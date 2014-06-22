@@ -13,17 +13,16 @@ PKGBUILD=$(PKGPATH)/src/nano
 
 include ../../../Makefile.in
 
-export CFLAGS=-I$(shell readlink -f ../ncurses/ncurses-*/include)
-export LDFLAGS=-L$(shell readlink -f ../ncurses/ncurses-*/lib)
+export CFLAGS=-I$(PWD)/../ncurses/.../include/
+export LDFLAGS=-L$(PWD)/../ncurses/.../lib/
 
 all: $(PKGBOOT)
 
-$(PKGPATH)/src/nano: $(PKGPATH)/Makefile
+$(PKGBUILD): $(PKGPATH)/Makefile
 	@$(MAKE) -C $(PKGPATH)
 	@$(STRIP) $@
 
 $(PKGPATH)/Makefile:
-	@$(MAKE) -C ../ncurses
 	@$(MAKE) $(PKGPATH)
 	@$(SEDMUSL) $(PKGPATH)/config.sub
 	@cd $(PKGPATH) && ./configure \
@@ -35,6 +34,6 @@ $(PKGPATH)/Makefile:
 		--disable-extra \
 		--enable-utf8
 
-pack:
-	@mkdir -p pack/usr/bin
-	@cp -a $(PKGPATH)/src/nano pack/usr/bin
+$(PKGNAME).d: $(PKGBUILD)
+	@mkdir -p $@/usr/bin
+	@cp -a $< $@/usr/bin

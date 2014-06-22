@@ -13,19 +13,19 @@ PKGBUILD=$(PKGPATH)/madplay
 
 include ../../../Makefile.in
 
-export CFLAGS=-I$(shell readlink -f ../zlib/zlib-*/) \
-	-I$(shell readlink -f ../libmad/libmad-*/) \
-	-I$(shell readlink -f ../libid3tag/libid3tag-*/)
+export CFLAGS=-I$(PWD)/../zlib/.../ \
+	-I$(PWD)/../libmad/.../ \
+	-I$(PWD)/../libid3tag/.../
 
-export LDFLAGS=-L$(shell readlink -f ../zlib/zlib-*/) \
-	-L$(shell readlink -f ../libmad/libmad-*/) \
-	-L$(shell readlink -f ../libmad/libmad-*/.libs) \
-	-L$(shell readlink -f ../libid3tag/libid3tag-*/) \
-	-L$(shell readlink -f ../libid3tag/libid3tag-*/.libs)
+export LDFLAGS=-L$(PWD)/../zlib/.../ \
+	-L$(PWD)/../libmad/.../ \
+	-L$(PWD)/../libmad/.../.libs/ \
+	-L$(PWD)/../libid3tag/.../ \
+	-L$(PWD)/../libid3tag/.../.libs/
 
 all: $(PKGBOOT)
 
-$(PKGPATH)/madplay: $(PKGPATH)/Makefile
+$(PKGBUILD): $(PKGPATH)/Makefile
 	@$(MAKE) -C $(PKGPATH)
 	@$(STRIP) $@
 
@@ -42,7 +42,7 @@ $(PKGPATH)/Makefile:
 		--without-alsa \
 		--without-esd
 
-pack:
+$(PKGNAME).d: $(PKGBUILD)
 	@$(RM) -r $@
 	@mkdir -p $@/usr/bin
-	@cp -a $(PKGPATH)/madplay $@/usr/bin
+	@cp -a $< $@/usr/bin

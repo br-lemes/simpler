@@ -14,7 +14,7 @@ include ../../../Makefile.in
 
 all: $(PKGBOOT)
 
-$(PKGPATH)/src/.libs/file: $(PKGPATH)/Makefile
+$(PKGBUILD): $(PKGPATH)/Makefile
 	@$(MAKE) -C $(PKGPATH)
 	@$(STRIP) $@ $(PKGPATH)/src/.libs/libmagic.so.1.0.0
 
@@ -23,9 +23,9 @@ $(PKGPATH)/Makefile:
 	@$(SEDMUSL) $(PKGPATH)/config.sub
 	@cd $(PKGPATH) && ./configure --prefix=/usr --host=$(TARGET)
 
-pack:
+$(PKGNAME).d: $(PKGBUILD)
 	@$(RM) -r $@
 	@mkdir -p $@/usr/bin $@/usr/lib $@/usr/share/misc
-	@cp -a $(PKGPATH)/src/.libs/file $@/usr/bin
+	@cp -a $< $@/usr/bin
 	@cp -a $(PKGPATH)/src/.libs/libmagic.so* $@/usr/lib
 	@cp -a $(PKGPATH)/magic/magic.mgc $@/usr/share/misc

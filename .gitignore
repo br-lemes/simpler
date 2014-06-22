@@ -1,6 +1,7 @@
+...
+*.d
 .*/
 *-*/
-pack
 build
 *.tgz
 *.part

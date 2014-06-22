@@ -10,17 +10,15 @@ PKGDOWN=http://rsync.samba.org/ftp/rsync/src/
 PKGMD5SUM=3be148772a33224771a8d4d2a028b132
 
 PKGBUILD=$(PKGPATH)/rsync
-PKGCLEAR=$(PKGBUILD)
 
 include ../../../Makefile.in
 
-export CFLAGS=-I$(shell readlink -f ../zlib/zlib-*/)
-export LDFLAGS=-L$(shell readlink -f ../zlib/zlib-*/)
+export CFLAGS=-I$(PWD)/../zlib/.../
+export LDFLAGS=-L$(PWD)/../zlib/.../
 
 all: $(PKGBOOT)
 
 $(PKGPATH)/Makefile:
-	@$(MAKE) -C ../zlib
 	@$(MAKE) $(PKGPATH)
 	@cd $(PKGPATH) && ./configure \
 		--prefix=/usr \
@@ -28,10 +26,11 @@ $(PKGPATH)/Makefile:
 		--host=$(TARGET) \
 		--without-included-zlib
 
-$(PKGPATH)/rsync: $(PKGPATH)/Makefile
+$(PKGBUILD): $(PKGPATH)/Makefile
 	@$(MAKE) -C $(PKGPATH)
 	@$(STRIP) $@
 
-pack: $(PKGPATH)/rsync
-	@mkdir -p pack/usr/bin
-	@cp -a $< pack/usr/bin
+$(PKGNAME).d: $(PKGBUILD)
+	@$(RM) -r $@
+	@mkdir -p $@/usr/bin
+	@cp -a $< $@/usr/bin

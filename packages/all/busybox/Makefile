@@ -21,7 +21,4 @@ $(PKGPATH)/busybox: $(PKGPATH)/.config
 menuconfig: $(PKGPATH)/.config
 	@ARCH="$(ARCH)" CROSS_COMPILE="$(TARGET)-" $(MAKE) -C $(PKGPATH) menuconfig
 
-pack:
-	$(error Not a package)
-
-.PHONY: menuconfig pack
+.PHONY: menuconfig

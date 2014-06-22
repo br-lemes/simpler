@@ -14,7 +14,7 @@ include ../../../Makefile.in
 
 all: $(PKGBOOT)
 
-$(PKGPATH)/gawk: $(PKGPATH)/Makefile
+$(PKGBUILD): $(PKGPATH)/Makefile
 	@$(MAKE) -C $(PKGPATH)
 	@$(STRIP) $@
 
@@ -33,6 +33,6 @@ $(PKGPATH)/Makefile:
 		--without-readline \
 		--without-mpfr
 
-pack:
-	@mkdir -p pack/usr/bin
-	@cp -a $(PKGPATH)/gawk pack/usr/bin
+$(PKGNAME).d: $(PKGBUILD)
+	@mkdir -p $@/usr/bin
+	@cp -a $< $@/usr/bin

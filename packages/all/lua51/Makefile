@@ -15,15 +15,12 @@ include ../../../Makefile.in
 
 all: $(PKGBOOT)
 
-$(PKGPATH)/src/liblua5.1.so:
+$(PKGBUILD):
 	@$(MAKE) $(PKGPATH)
 	@$(MAKE) -C $(PKGPATH)/src liblua5.1.so LUA_A=liblua5.1.so "AR=$(CC) -Wl,-E -shared -o" RANLIB="$(STRIP)" CC="$(CC)"
-
-$(PKGPATH)/src/lua:
-	@$(MAKE) $(PKGPATH)
 	@$(MAKE) -C $(PKGPATH)/src all CC="$(CC)" MYCFLAGS="-DLUA_USE_POSIX -DLUA_USEDLOPEN" MYLIBS="-Wl,-E -ldl" MYLDFLAGS=-s
 
-pack:
+$(PKGNAME).d: $(PKGBUILD)
 	@$(RM) -r $@
 	@mkdir -p $@/usr/bin $@/usr/lib
 	@cp -a $(PKGPATH)/src/lua $@/usr/bin/lua5.1

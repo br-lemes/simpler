@@ -8,8 +8,8 @@ PKGSITE=http://www.samba.org/
 PKGDOWN=http://www.samba.org/samba/ftp/stable/
 PKGMD5SUM=2f7aee1dc5d31aefcb364600915b31dc
 
-export CFLAGS=-I$(shell readlink -f ../zlib/zlib-*/)
-export LDFLAGS=-L$(shell readlink -f ../zlib/zlib-*/)
+export CFLAGS=-I$(PWD)/../zlib/.../
+export LDFLAGS=-L$(PWD)/../zlib/.../
 export samba_cv_CC_NEGATIVE_ENUM_VALUES=yes
 export libreplace_cv_HAVE_GETADDRINFO=no
 export ac_cv_file__proc_sys_kernel_core_pattern=yes
@@ -118,5 +118,5 @@ $(MAKEFILE):
 		--with-included-popt \
 		--with-included-iniparser
 
-pack:
-	@if [ ! -L pack ]; then ln -sf src pack; fi
+$(PKGNAME).d: $(PKGBUILD)
+	@if [ ! -L $@ ]; then ln -sf src $@; fi

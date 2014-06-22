@@ -22,7 +22,7 @@ EMULAYER_S=$(PKGPATH)/armlinux/emulayer.s
 
 all: $(PKGBOOT)
 
-src/usr/bin/e3: $(E3)
+$(PKGBUILD): $(E3)
 	@cp -a $< $@
 
 $(E3): $(E3_O) $(EMULAYER_O)
@@ -39,5 +39,5 @@ $(EMULAYER_O): $(EMULAYER_S)
 	@$(MAKE) $(PKGPATH)
 	@$(CD) && $(AS) --defsym LINUX=1 --defsym ARMCPU=1 emulayer.s -o emulayer.o
 
-pack:
-	@if [ ! -L pack ]; then ln -sf src pack; fi
+$(PKGNAME).d: $(PKGBUILD)
+	@if [ ! -L $@ ]; then ln -sf src $@; fi

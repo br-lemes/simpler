@@ -14,7 +14,7 @@ include ../../../Makefile.in
 
 all: $(PKGBOOT)
 
-$(PKGPATH)/.libs/$(PKGNAME).so.0.2.1: $(PKGPATH)/Makefile
+$(PKGBUILD): $(PKGPATH)/Makefile
 	@$(MAKE) -C $(PKGPATH)
 	@$(STRIP) $@
 
@@ -29,7 +29,7 @@ $(PKGPATH)/Makefile:
 		--enable-speed \
 		--enable-fpm=arm
 
-pack:
+$(PKGNAME).d: $(PKGBUILD)
 	@$(RM) -r $@
 	@mkdir -p $@/usr/lib
 	@cp -a $(PKGPATH)/.libs/$(PKGNAME).so* $@/usr/lib

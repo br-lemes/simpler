@@ -14,18 +14,18 @@ include ../../../Makefile.in
 
 all: $(PKGBOOT) $(PKGNAME)-dev.tgz
 
-$(PKGPATH)/libz.so:
+$(PKGBUILD):
 	@$(MAKE) $(PKGPATH)
 	@cd $(PKGPATH) && ./configure --prefix=/usr 
 	@$(MAKE) -C $(PKGPATH)
 	@$(STRIP) $@
 
-pack:
+$(PKGNAME).d: $(PKGBUILD)
 	@$(RM) -r $@
 	@mkdir -p $@/usr/lib
 	@cp -a $(PKGPATH)/libz.so* $@/usr/lib
 
-pack-dev:
+$(PKGNAME)-dev.d: $(PKGBUILD)
 	@$(RM) -r $@
 	@mkdir -p $@/usr/include $@/usr/lib
 	@cp -a $(PKGPATH)/zconf.h $(PKGPATH)/zlib.h $@/usr/include

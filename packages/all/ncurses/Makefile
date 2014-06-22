@@ -19,7 +19,7 @@ include ../../../Makefile.in
 
 all: $(PKGBOOT)
 
-$(LIBFORM) $(LIBMENU) $(LIBNCURSES) $(LIBPANEL): $(PKGPATH)/Makefile
+$(PKGBUILD): $(PKGPATH)/Makefile
 	@$(MAKE) -C $(PKGPATH)
 	@$(STRIP) $(PKGBUILD)
 
@@ -38,7 +38,8 @@ $(PKGPATH)/Makefile:
 		--disable-pc-files \
 		--enable-widec
 
-pack:
-	@mkdir -p pack/usr/lib
-	@cp -a $(PKGPATH)/lib/* pack/usr/lib
-	@$(MAKE) -C $(PKGPATH)/misc install.data DESTDIR=$(PWD)/pack
+$(PKGNAME).d: $(PKGBUILD)
+	@mkdir -p $@/usr/lib
+	@cp -a $(PKGPATH)/lib/* $@/usr/lib
+	@$(MAKE) -C $(PKGPATH)/misc install.data DESTDIR=$(PWD)/$@
+	@touch $@
