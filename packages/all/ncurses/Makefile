@@ -17,7 +17,7 @@ PKGBUILD=$(LIBFORM) $(LIBMENU) $(LIBNCURSES) $(LIBPANEL)
 
 include ../../../Makefile.in
 
-all: $(PKGBOOT)
+all: $(PKGNAME).tgz
 
 $(PKGBUILD): $(PKGPATH)/Makefile
 	@$(MAKE) -C $(PKGPATH)

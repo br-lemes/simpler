@@ -20,7 +20,7 @@ E3_S=$(PKGPATH)/armlinux/e3.s
 EMULAYER_O=$(PKGPATH)/armlinux/emulayer.o
 EMULAYER_S=$(PKGPATH)/armlinux/emulayer.s
 
-all: $(PKGBOOT)
+all: $(PKGNAME).tgz
 
 $(PKGBUILD): $(E3)
 	@cp -a $< $@

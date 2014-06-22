@@ -23,7 +23,7 @@ export LDFLAGS=-L$(PWD)/../zlib/.../ \
 	-L$(PWD)/../libid3tag/.../ \
 	-L$(PWD)/../libid3tag/.../.libs/
 
-all: $(PKGBOOT)
+all: $(PKGNAME).tgz
 
 $(PKGBUILD): $(PKGPATH)/Makefile
 	@$(MAKE) -C $(PKGPATH)

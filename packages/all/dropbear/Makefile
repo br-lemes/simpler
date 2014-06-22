@@ -14,7 +14,7 @@ PKGCLEAN=$(PKGBUILD)
 
 include ../../../Makefile.in
 
-all: $(PKGBOOT)
+all: $(PKGNAME).tgz
 
 $(PKGBUILD): $(PKGPATH)/dropbearmulti
 	@cp -a $< $@

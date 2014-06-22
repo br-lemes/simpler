@@ -13,7 +13,7 @@ PKGBUILD=$(PKGPATH)/src/liblua5.1.so $(PKGPATH)/src/lua
 
 include ../../../Makefile.in
 
-all: $(PKGBOOT)
+all: $(PKGNAME).tgz
 
 $(PKGBUILD):
 	@$(MAKE) $(PKGPATH)

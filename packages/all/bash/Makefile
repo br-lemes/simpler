@@ -12,7 +12,7 @@ PKGBUILD=$(PKGPATH)/bash
 
 include ../../../Makefile.in
 
-all: $(PKGBOOT)
+all: $(PKGNAME).tgz
 
 $(PKGBUILD): $(PKGPATH)/Makefile
 	@$(MAKE) -C $(PKGPATH)

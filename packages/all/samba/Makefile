@@ -35,7 +35,7 @@ PKGBUILD=$(DEST_SMBD) $(DEST_NMBD) $(DEST_SMBPASSWD) $(DEST_LIBTALLOC) $(DEST_LI
 
 include ../../../Makefile.in
 
-all: $(PKGBOOT)
+all: $(PKGNAME).tgz
 
 $(DEST_SMBD): $(SMBD) src/usr/sbin
 	@cp -a $< $@

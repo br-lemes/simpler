@@ -12,7 +12,7 @@ PKGBUILD=$(PKGPATH)/libz.so
 
 include ../../../Makefile.in
 
-all: $(PKGBOOT) $(PKGNAME)-dev.tgz
+all: $(PKGNAME).tgz
 
 $(PKGBUILD):
 	@$(MAKE) $(PKGPATH)
@@ -24,9 +24,3 @@ $(PKGNAME).d: $(PKGBUILD)
 	@$(RM) -r $@
 	@mkdir -p $@/usr/lib
 	@cp -a $(PKGPATH)/libz.so* $@/usr/lib
-
-$(PKGNAME)-dev.d: $(PKGBUILD)
-	@$(RM) -r $@
-	@mkdir -p $@/usr/include $@/usr/lib
-	@cp -a $(PKGPATH)/zconf.h $(PKGPATH)/zlib.h $@/usr/include
-	@cp -a $(PKGPATH)/libz.a $@/usr/lib

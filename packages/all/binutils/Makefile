@@ -12,7 +12,7 @@ PKGBCLEAN=build
 
 include ../../../Makefile.in
 
-all: $(PKGBOOT)
+all: $(PKGNAME).tgz
 
 $(PKGNAME).d: build
 	@$(MAKE) -C build DESTDIR=$(PWD)/$@ install

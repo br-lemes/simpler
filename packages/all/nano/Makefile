@@ -16,7 +16,7 @@ include ../../../Makefile.in
 export CFLAGS=-I$(PWD)/../ncurses/.../include/
 export LDFLAGS=-L$(PWD)/../ncurses/.../lib/
 
-all: $(PKGBOOT)
+all: $(PKGNAME).tgz
 
 $(PKGBUILD): $(PKGPATH)/Makefile
 	@$(MAKE) -C $(PKGPATH)

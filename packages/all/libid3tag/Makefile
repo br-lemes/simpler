@@ -16,7 +16,7 @@ include ../../../Makefile.in
 export CFLAGS=-I$(PWD)/../zlib/.../
 export LDFLAGS=-L$(PWD)/../zlib/.../
 
-all: $(PKGBOOT)
+all: $(PKGNAME).tgz
 
 $(PKGBUILD): $(PKGPATH)/Makefile
 	@$(MAKE) -C $(PKGPATH)

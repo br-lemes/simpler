@@ -16,7 +16,7 @@ export LUA_CFLAGS=-I$(PWD)/../lua52/.../src/
 export LUA_LIBS=-L$(PWD)/../lua52/.../src/ -llua
 export LD_LIBRARY_PATH=$(PWD)/../lua52/.../src/
 
-all: $(PKGBOOT)
+all: $(PKGNAME).tgz
 
 $(PKGBUILD): $(PKGPATH)/Makefile
 	@$(MAKE) -C $(PKGPATH)

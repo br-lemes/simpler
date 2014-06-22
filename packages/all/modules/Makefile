@@ -7,7 +7,7 @@ PKGSITE=https://github.com/raspberrypi/linux
 
 include ../../../Makefile.in
 
-all: $(PKGBOOT)
+all: $(PKGNAME).tgz
 
 ../../../linux/.config: ../../../kernel/config-kernel
 	@cp $< $@
