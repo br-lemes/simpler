@@ -51,6 +51,11 @@ endif
 endif
 endif
 
+# default PKGNAMVER
+ifndef PKGNAMVER
+PKGNAMVER=$(PKGPATH)
+endif
+
 endif
 
 # performs checksum verification in a tarball
@@ -71,8 +76,8 @@ endif
 
 # shows package version and download site
 version:
-ifdef PKGPATH
-	@printf "  %-20s%s\n" "$(PKGPATH)" "$(PKGSITE)"
+ifdef PKGNAMVER
+	@printf "  %-20s%s\n" "$(PKGNAMVER)" "$(PKGSITE)"
 endif
 
 # cleans generated or temporary files
