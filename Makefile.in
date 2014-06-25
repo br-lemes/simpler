@@ -110,6 +110,7 @@ BUILD='$$(date +%F-%Z)'\n" > $(LRPKG)/$*.info
 	@touch $(LRPKG)/$*.list
 	@find $</ -type f -o -type l | sed "s,$</,," > $(LRPKG)/$*.list
 	@tar czf $@ -C $</ --owner=root --group=root -T $(LRPKG)/$*.list
+	@mkdir -p ../../../boot/packages
 	@ln -f $@ ../../../boot/packages/$@
 endif
 
