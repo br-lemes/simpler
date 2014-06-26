@@ -123,7 +123,9 @@ ifdef PKGPATCH
 endif
 	@ln -s $@ ...
 	@touch $@
+ifdef PKGDEPENDENCIES
 	@$(MAKE) $(PKGDEPENDENCIES)
+endif
 
 # downloads a tarball
 $(PKGFILE):
