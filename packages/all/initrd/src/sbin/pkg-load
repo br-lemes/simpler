@@ -43,6 +43,12 @@ if [ -f "$LRPKG/$pkgname.list" ]; then
 	exit 1
 fi
 
+if [ "$(stat -c %s $pkgfile)" -gt "$PKGMAXSIZE" ]; then
+	umt_boot
+	echo "Package '$pkgname' exceeds the maximum allowed file size." >&2
+	exit 1
+fi
+
 case "$PKGMODE" in
 	[Ww]|[Ww][Hh][Ii][Tt][Ee]) PKGMODE=WHITE;;
 	[Bb]|[Bb][Ll][Aa][Cc][Kk]) PKGMODE=BLACK;;
