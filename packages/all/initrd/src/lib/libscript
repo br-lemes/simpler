@@ -13,15 +13,14 @@ case "$0" in
 		;;
 esac
 
-[ -f /etc/config/master.cfg ] && . /etc/config/master.cfg
+PKGMAXSIZE=2097152 # 2MiB
+LOGSTDERR=/var/log/stderr
 
-[ -z "$PKGMAXSIZE" ] && PKGMAXSIZE=2097152 # 2MiB
+[ -f /etc/config/master.cfg ] && . /etc/config/master.cfg
 
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 LRPKG=/var/lib/lrpkg
 DESCRIPTION="$(head -3 "$0" | tail -1 | sed -e 's/^# //')"
-
-[ -z "$LOGSTDERR" ] && LOGSTDERR=/var/log/stderr
 
 grep -q /boot /proc/mounts
 BOOT="$?"
