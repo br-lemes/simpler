@@ -46,19 +46,25 @@ www/%.tgz: boot/packages/%.tgz
 	@cp -a $< $@
 	@tar xOf $@ "var/lib/lrpkg/$*.info" > "www/$*.info"
 
+www/kernel.img: boot/kernel.img
+	@cp -a $< $@
+
 www/kernel.info: kernel/kernel.info
+	@cp -a $< $@
+
+www/initrd.gz: boot/initrd.gz
 	@cp -a $< $@
 
 www/initrd.info: packages/all/initrd/src/var/lib/lrpkg/initrd.info
 	@cp -a $< $@
 
-kernel/kernel.info:
+boot/kernel.img kernel/kernel.info:
 	@$(MAKE) -sC kernel
 
-packages/all/initrd/src/var/lib/lrpkg/initrd.info:
+boot/initrd.gz packages/all/initrd/src/var/lib/lrpkg/initrd.info:
 	@$(MAKE) -sC packages/all/initrd
 
-www: www/kernel.info www/initrd.info
+www: www/kernel.img www/initrd.gz www/kernel.info www/initrd.info
 	@mkdir -p $@
 	@for i in boot/packages/*.tgz; do \
 		if [ -f "$$i" ]; then \
