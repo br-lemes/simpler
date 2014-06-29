@@ -9,9 +9,12 @@ build
 *.tar.bz2
 
 /boot/
+/kernel/kernel.info
 /linux/
 
 /packages/*
 !/packages/all/
 
 /packages/all/*/*.d
+
+/www
