@@ -49,4 +49,5 @@ dir /var/run               0755 0 0
 dir /var/spool             0755 0 0
 dir /var/tmp               1777 0 0
 slink /usr/local/man /usr/local/share/man 0777 0 0
+file /var/lib/lrpkg/kernel.list /dev/null 0644 0 0
 file /var/lib/lrpkg/kernel.info ../kernel/kernel.info 0644 0 0
