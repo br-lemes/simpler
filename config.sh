@@ -7,18 +7,11 @@
 #
 # To build a cross-compiler follow these steps:
 #
-# git clone https://github.com/raspberrypi/linux.git
 # git clone https://github.com/GregorR/musl-cross.git
 # cd musl-cross
 # cp ../config.sh .
-# ln -s ../linux linux-rpi
 # ./build
 
-touch "$MUSL_CC_BASE/tarballs/linux-rpi.tar.xz"
-touch linux-rpi/extracted
-
-LINUX_HEADERS_VERSION=rpi
-MUSL_VERSION=1.0.1
 GCC_BUILTIN_PREREQS=yes
 
 ARCH=arm
