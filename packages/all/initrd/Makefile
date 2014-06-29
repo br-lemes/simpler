@@ -11,15 +11,16 @@ LIBC=/opt/cross/$(TARGET)/$(TARGET)/lib/libc.so
 LIBGCC=/opt/cross/$(TARGET)/$(TARGET)/lib/libgcc_s.so.1
 LIBSTDCXX=/opt/cross/$(TARGET)/$(TARGET)/lib/libstdc++.so
 
-PKGCLEAN=initrd.gz src/bin/busybox src/lib/libc.so src/lib/libgcc_s.so.1 \
-	src/lib/libstdc++.so*
+PKGBUILD=src/bin/busybox src/lib/libc.so src/lib/libgcc_s.so.1 \
+	src/lib/libstdc++.so
+PKGCLEAN=initrd.gz $(PKGBUILD)* src/var/lib/lrpkg/initrd.*
 
 all: ../../../boot/initrd.gz
 
 ../../../boot/initrd.gz: initrd.gz
 	@ln -f $< $@
 
-initrd.gz: $(subst *,,$(PKGCLEAN))
+initrd.gz: $(PKGBUILD)
 	@mkdir -p src/var/lib/lrpkg
 	@printf "\
 DESCRIPTION='$(PKGDESC)'\n\
