@@ -106,7 +106,7 @@ DEPENDENCIES='$(PKGDEPENDENCIES)'\n\
 DESCRIPTION='$(PKGDESC)'\n\
 CATEGORIES='$(PKGCATEGORIES)'\n\
 VERSION='$(PKGVERSION)'\n\
-BUILD='$$(date +%F-%Z)'\n" > $(LRPKG)/$*.info
+BUILD='$$(date "+%F %T")'\n" > $(LRPKG)/$*.info
 	@touch $(LRPKG)/$*.list
 	@find $</ -type f -o -type l | sed "s,$</,," > $(LRPKG)/$*.list
 	@tar czf $@ -C $</ --owner=root --group=root -T $(LRPKG)/$*.list
