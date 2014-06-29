@@ -6,7 +6,14 @@ KERNEL=../linux/arch/$(ARCH)/boot/zImage
 all: ../boot/kernel.img
 
 $(KERNEL): ../linux/.config
+	@$(MAKE) kernel.info
 	@$(MAKE) -C ../linux ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- bzImage
+
+kernel.info:
+	@printf "\
+DESCRIPTION='The Linux Kernel'\n\
+VERSION='$(shell $(MAKE) -sC ../linux kernelversion)'\n\
+BUILD='$$(date "+%F %T")'\n" > $@
 
 ../boot/kernel.img: $(KERNEL)
 	@ln -f $< $@
@@ -15,10 +22,12 @@ $(KERNEL): ../linux/.config
 	@cp $< $@
 
 clean:
-	@echo $(RM) $(KERNEL)
-	@$(RM) $(KERNEL)
+	@echo $(RM) $(KERNEL) kernel.info
+	@$(RM) $(KERNEL) kernel.info
 
 binclean:
+	@echo $(RM) kernel.info
+	@$(RM) kernel.info
 	@$(MAKE) -C ../linux mrproper
 
 downclean: binclean
@@ -26,4 +35,4 @@ downclean: binclean
 nconfig menuconfig xconfig gconfig: ../linux/.config
 	@$(MAKE) -C ../linux ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- $@
 
-.PHONY: all clean binclean nconfig menuconfig xconfig gconfig
+.PHONY: all clean binclean nconfig menuconfig xconfig gconfig kernel.info
