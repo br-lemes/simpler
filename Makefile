@@ -42,6 +42,36 @@ firmware:
 	@mkdir -p boot
 	@mv LICENCE.broadcom bootcode.bin fixup*.dat start*.elf boot
 
+www/%.tgz: boot/packages/%.tgz
+	@cp -a $< $@
+	@tar xOf $@ "var/lib/lrpkg/$*.info" > "www/$*.info"
+
+www/kernel.info: kernel/kernel.info
+	@cp -a $< $@
+
+www/initrd.info: packages/all/initrd/src/var/lib/lrpkg/initrd.info
+	@cp -a $< $@
+
+kernel/kernel.info:
+	@$(MAKE) -sC kernel
+
+packages/all/initrd/src/var/lib/lrpkg/initrd.info:
+	@$(MAKE) -sC packages/all/initrd
+
+www: www/kernel.info www/initrd.info
+	@mkdir -p $@
+	@for i in boot/packages/*.tgz; do \
+		if [ -f "$$i" ]; then \
+			$(MAKE) -s "www/$$(basename "$$i")"; \
+		fi; \
+	done
+	@cd www && for i in *.tgz; do \
+		if [ -f "$$i" -a ! -f "$(PWD)/boot/packages/$$i" ]; then \
+			$(RM) "$$i" "$$(basename "$$i" .tgz).info"; \
+		fi; \
+	done
+	@cd www && tar czf all.tar.gz *.info
+
 endif
 
-.PHONY: all show version clean binclean downclean md5sum categories
+.PHONY: all show version clean binclean downclean md5sum categories www
