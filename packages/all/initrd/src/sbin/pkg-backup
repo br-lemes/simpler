@@ -19,6 +19,11 @@ if [ ! -f "$LRPKG/$1.list" ]; then
 	exit 1
 fi
 
+if [ "$1" = "kernel" ]; then
+	echo "Cannot backup the kernel." >&2
+	exit 1
+fi
+
 mt_boot || exit 1
 if [ "$1" = "initrd" ]; then
 	cd /
