@@ -14,6 +14,11 @@ $DESCRIPTION." >&2
 
 [ "$#" != 1 -o "$1" = "-h" -o "$1" = "--help" ] && help
 
+if [ "$1" = "kernel" -o "$1" = "initrd" ]; then
+	echo "Cannot unload the $1." >&2
+	exit 1
+fi
+
 if [ ! -f "$LRPKG/$1.list" ]; then
 	echo "Package '$1' not found." >&2
 	exit 1
