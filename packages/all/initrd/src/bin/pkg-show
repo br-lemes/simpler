@@ -1,0 +1,46 @@
+#!/bin/sh
+#
+# Lists the available packages or the info from a package
+
+. /lib/libscript
+
+help() {
+	echo "\
+Usage: $(basename "$0") [package|category]
+
+$DESCRIPTION." >&2
+	exit 1
+}
+
+if [ "$#" = 0 ]; then
+	for i in $LRPKG_CACHE/*.info; do
+		[ -f "$i" ] && basename "$i" .info
+	done
+elif [ "$#" = 1 ]; then
+	case "$1" in
+		-h|--help) help;;
+		*)
+			if [ -f "$LRPKG/$1.info" ]; then
+				cat "$LRPKG/$1.info"
+				if [ -f "$LRPKG_CACHE/$1.info" ]; then
+					if ! diff -qw "$LRPKG/$1.info" "$LRPKG_CACHE/$1.info" > /dev/null; then
+						echo
+						echo "WARNING: new version available!"
+					fi
+				fi
+			elif [ -f "$LRPKG_CACHE/$1.info" ]; then
+				cat  "$LRPKG_CACHE/$1.info"
+			else
+				for i in $LRPKG_CACHE/*.info; do
+					if [ -f "$i" ]; then
+						if grep -q "^CATEGORIES='$1'$" "$i"; then
+							basename "$i" .info
+						fi
+					fi
+				done
+			fi
+			;;
+	esac
+else
+	help
+fi

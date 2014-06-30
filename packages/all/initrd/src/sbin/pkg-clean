@@ -1,0 +1,17 @@
+#!/bin/sh
+#
+# Cleans the packages cache
+
+. /lib/libscript
+
+help() {
+	echo "\
+Usage: $(basename "$0")
+
+$DESCRIPTION." >&2
+	exit 1
+}
+
+[ "$#" != 0 ] && help
+
+rm -rf "$LRPKG_CACHE"

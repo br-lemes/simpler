@@ -1,0 +1,27 @@
+#!/bin/sh
+#
+# Downloads a package
+
+. /lib/libscript
+
+help() {
+	echo "\
+Usage: $(basename "$0") <package>
+
+$DESCRIPTION." >&2
+	exit 1
+}
+
+[ "$#" != 1 -o "$1" = "-h" -o "$1" = "--help" ] && help
+
+mkdir -p "$LRPKG_CACHE"
+if [ -z "$PKGSITE" ]; then
+	echo "PKGSITE undefined." >&2
+	exit 1
+fi
+
+case "$1" in
+	kernel) wget -P "$LRPKG_CACHE" "$PKGSITE/kernel.img";;
+	initrd) wget -P "$LRPKG_CACHE" "$PKGSITE/initrd.gz";;
+	*) wget -P "$LRPKG_CACHE" "$PKGSITE/$1.tgz";;
+esac

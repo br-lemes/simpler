@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# Updates the cached packages info
+
+. /lib/libscript
+
+help() {
+	echo "\
+Usage: $(basename "$0")
+
+$DESCRIPTION." >&2
+	exit 1
+}
+
+[ "$#" != 0 ] && help
+
+mkdir -p "$LRPKG_CACHE"
+if [ -z "$PKGSITE" ]; then
+	echo "PKGSITE undefined." >&2
+	exit 1
+fi
+
+rm -f "$LRPKG_CACHE/all.tar.gz"
+wget -P "$LRPKG_CACHE" "$PKGSITE/all.tar.gz" && \
+	tar xzf "$LRPKG_CACHE/all.tar.gz" -C "$LRPKG_CACHE"
