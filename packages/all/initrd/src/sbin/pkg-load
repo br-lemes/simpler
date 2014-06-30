@@ -39,7 +39,7 @@ fi
 
 if [ -f "$LRPKG/$pkgname.list" ]; then
 	umt_boot
-	echo "Package '$pkgname' already $(echo $SCRIPT | sed -e 's/pkg-//')ed." >&2
+	echo "Package '$pkgname' is already $(echo $SCRIPT | sed -e 's/pkg-//')ed." >&2
 	exit 1
 fi
 
@@ -48,12 +48,6 @@ if [ "$(stat -c %s $pkgfile)" -gt "$PKGMAXSIZE" ]; then
 	echo "Package '$pkgname' exceeds the maximum allowed file size." >&2
 	exit 1
 fi
-
-case "$PKGMODE" in
-	[Ww]|[Ww][Hh][Ii][Tt][Ee]) PKGMODE=WHITE;;
-	[Bb]|[Bb][Ll][Aa][Cc][Kk]) PKGMODE=BLACK;;
-	*) PKGMODE=NO
-esac
 
 case "$PKGMODE" in
 	WHITE)
