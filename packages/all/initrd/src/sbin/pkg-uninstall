@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# Uninstalls a package
+
+. /lib/libscript
+
+help() {
+	echo "\
+Usage: $(basename "$0") <package>
+
+$DESCRIPTION." >&2
+	exit 1
+}
+
+[ "$#" != 1 -o "$1" = "-h" -o "$1" = "--help" ] && help
+
+if [ "$1" = "kernel" -o "$1" = "initrd" ]; then
+	echo "Cannot uninstall the $1." >&2
+	exit 1
+fi
+
+pkg-unload "$1" && {
+	mt_boot || exit 1
+	rm -f "/boot/packages/$1.tgz"
+	umt_boot
+}
