@@ -53,25 +53,34 @@ while read DEV MP TYPE || [ -n "$MP" ]; do
 	fi
 done < /etc/fstab
 
-# /home may be a mount point, a symbolic link or create an empty directory
+# /home and /opt may be a mount point, a symbolic link or
+# create an empty directory
 [ ! -d /home -a -n "$HOME_SYMLINK" ]  && ln -s "$HOME_SYMLINK" /home
-mkdir -p /home
+[ ! -d /opt -a -n "$OPT_SYMLINK" ] && ln -s "$OPT_SYMLINK" /opt
+mkdir -p /home /opt
 
-logstart "Mounting filesystems"
-mount -a 2>> "$LOGSTDERR"
-logstatus
+waitandmount() {
+	# waits for usb before mounting, maybe sda, sdb, etc.
+	[ -b /dev/mmcblk0p1 ] && sleep 3
 
-# check for user home directories and create if needed
-while read LINE || [ -n "$LINE" ]; do
-	USER_ID=$(echo "$LINE" | cut -d : -f 3)
-	USER_HOME=$(echo "$LINE" | cut -d : -f 6)
-	if [ "$USER_ID" -eq 0 -o "$USER_ID" -gt 999 ]; then
-		if [ ! -d "$USER_HOME" -o "$USER_HOME" = "/root" ]; then
-			mkdir -p "$USER_HOME"
-			[ -d /etc/skel ] && cp -a /etc/skel/. "$USER_HOME"
+	logstart "Mounting filesystems"
+	mount -a 2>> "$LOGSTDERR"
+	logstatus
+
+	# check for user home directories and create if needed
+	while read LINE || [ -n "$LINE" ]; do
+		USER_ID=$(echo "$LINE" | cut -d : -f 3)
+		USER_HOME=$(echo "$LINE" | cut -d : -f 6)
+		if [ "$USER_ID" -eq 0 -o "$USER_ID" -gt 999 ]; then
+			if [ ! -d "$USER_HOME" -o "$USER_HOME" = "/root" ]; then
+				mkdir -p "$USER_HOME"
+				[ -d /etc/skel ] && cp -a /etc/skel/. "$USER_HOME"
+			fi
 		fi
-	fi
-done < /etc/passwd
+	done < /etc/passwd
+}
+
+waitandmount &
 
 if [ -b /dev/mmcblk0p1 ]; then
 	service network start 2>> "$LOGSTDERR" &

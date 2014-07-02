@@ -10,7 +10,6 @@ dir /etc/rc.d              0755 0 0
 dir /lib                   0755 0 0
 dir /media                 0755 0 0
 dir /mnt                   0755 0 0
-dir /opt                   0755 0 0
 dir /proc                  0755 0 0
 dir /root                  0750 0 0
 dir /sbin                  0755 0 0
