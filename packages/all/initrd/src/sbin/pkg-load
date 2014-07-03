@@ -23,18 +23,16 @@ mt_boot || exit 1
 
 # tries to guess package name and package file
 pkgname="$(basename $1 .tgz)"
-if [ -f "$1" ]; then
-	pkgfile="$1"
-elif [ -f "$1.tgz" ]; then
-	pkgfile="$1.tgz"
+if [ -f "$pkgname.tgz" ]; then
+	pkgfile="$pkgname.tgz"
+elif [ -f "$LRPKG_CACHE/$pkgname.tgz" ]; then
+	pkgfile="$LRPKG_CACHE/$pkgname.tgz"
+elif [ -f "/boot/packages/$pkgname.tgz" ]; then
+	pkgfile="/boot/packages/$pkgname.tgz"
 else
-	if [ -f "/boot/packages/$pkgname.tgz" ]; then
-		pkgfile="/boot/packages/$pkgname.tgz"
-	else
-		umt_boot
-		echo "Package '$pkgname' not found." >&2
-		exit 1
-	fi
+	umt_boot
+	echo "Package '$pkgname' not found." >&2
+	exit 1
 fi
 
 if [ -f "$LRPKG/$pkgname.list" ]; then
