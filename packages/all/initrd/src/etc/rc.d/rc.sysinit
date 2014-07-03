@@ -85,7 +85,7 @@ waitandmount &
 if [ -b /dev/mmcblk0p1 ]; then
 	service network start 2>> "$LOGSTDERR" &
 	service udhcpd start 2>> "$LOGSTDERR" &
-	service ntpd start 2>> "$LOGSTDERR" &
+	sleep 5 && service ntpd start 2>> "$LOGSTDERR" &
 fi
 
 # extract the packages

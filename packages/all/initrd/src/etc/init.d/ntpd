@@ -5,16 +5,16 @@
 # Config from master.cfg
 # Client always enabled
 # Default NTPD_SERVER=YES
-# Default NTPD_PEER="-p 0.pool.ntp.org -p 1.pool.ntp.org -p 2.pool.ntp.org -p 3.pool.ntp.org"
+# Default NTPD_PEER="-p 0.pool.ntp.org -p 1.pool.ntp.org -p 2.pool.ntp.org"
 
-. /etc/config/master.cfg
+NTPD_PEER="-p 0.pool.ntp.org -p 1.pool.ntp.org -p 2.pool.ntp.org"
+
 . /lib/libscript
 
 case "$NTPD_SERVER" in
 	[Nn]|[Nn][Oo]) NTPD_SERVER=;;
 	*) NTPD_SERVER=-l
 esac
-[ -z "$NTPD_PEER" ] && NTPD_PEER="-p 0.pool.ntp.org -p 1.pool.ntp.org -p 2.pool.ntp.org -p 3.pool.ntp.org"
 PID=/var/run/ntpd.pid
 
 start() {
