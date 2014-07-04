@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Uninstalls a package
+# Unload and remove a package from the boot media
 
 . /lib/libscript
 
