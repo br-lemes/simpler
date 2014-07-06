@@ -6,7 +6,6 @@
 # Default UDHCPD_PORT=67
 # Default UDHCPD_ENABLED=YES
 
-. /etc/config/master.cfg
 . /lib/libscript
 
 case "$UDHCPD_ENABLED" in

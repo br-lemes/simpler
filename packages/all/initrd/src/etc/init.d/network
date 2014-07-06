@@ -7,7 +7,6 @@
 # TODO: list the available options
 # TODO: comment and improve (maybe ifplugd)
 
-. /etc/config/master.cfg
 . /lib/libscript
 
 HOSTS=/etc/config/hosts.cfg
