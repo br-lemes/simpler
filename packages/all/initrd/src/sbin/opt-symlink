@@ -1,0 +1,32 @@
+#!/bin/sh
+#
+# Creates symbolic links for packages installed to /opt
+
+. /lib/libscript
+
+help() {
+	echo "\
+Usage: $(basename "$0") [package]
+
+$DESCRIPTION." >&2
+	exit 1
+}
+
+[ "$#" -gt 1 -o "$1" = "-h" -o "$1" = "--help" ] && help
+
+if [ "$#" = "1" ]; then
+	if [ -d "/opt/$1" -a -f "/opt/$1$LRPKG/$1.list" ]; then
+		while read line || [ -n "$line" ]; do
+			ln -sf "/opt/$1/$line" "/$line"
+		done < "/opt/$1$LRPKG/$1.list"
+	else
+		echo "Package '$1' not found in /opt." >&2
+	fi
+else
+	for i in /opt/*$LRPKG/*.list; do
+		[ ! -f "$i" ] && break
+		while read line || [ -n "$line" ]; do
+			ln -sf "/opt/$(basename "$i" .list)/$line" "/$line"
+		done < "$i"
+	done
+fi
