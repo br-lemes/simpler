@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Rebuilds a package tarball to the boot media
+# Rebuild a package tarball to the boot media
 
 . /lib/libscript
 

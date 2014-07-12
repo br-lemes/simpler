@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Removes a package from the system and stops the services if any
+# Stop the services if any and remove a package from the system
 
 . /lib/libscript
 

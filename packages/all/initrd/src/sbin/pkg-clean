@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Cleans the packages cache
+# Clean the packages cache
 
 . /lib/libscript
 

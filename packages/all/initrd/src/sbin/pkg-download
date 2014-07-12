@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Downloads a package
+# Download a package
 
 . /lib/libscript
 

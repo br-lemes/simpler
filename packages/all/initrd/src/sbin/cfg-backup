@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Saves your current configuration files to the boot media
+# Save your current configuration files to the boot media
 
 . /lib/libscript
 

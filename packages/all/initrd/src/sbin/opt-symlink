@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Creates symbolic links for packages installed to /opt
+# Create symbolic links for packages installed to /opt
 
 . /lib/libscript
 
