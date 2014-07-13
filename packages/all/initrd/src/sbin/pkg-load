@@ -1,8 +1,8 @@
 #!/bin/sh
 #
-# Extracts a package from a file or from the boot media,
-# pkg-extract just extracts and doesn't care about dependencies
-# pkg-load starts the services if any and looks for dependencies
+# Extract a package from a file or from the boot media,
+# pkg-extract just extract and doesn't care about dependencies
+# pkg-load look for dependencies and start the services if any
 
 . /lib/libscript
 
@@ -21,7 +21,7 @@ $(grep ^#\ $SCRIPT "$0" | sed -e s/^#\ $SCRIPT\ //)." >&2
 
 mt_boot || exit 1
 
-# tries to guess package name and package file
+# try to guess package name and package file
 pkgname="$(basename $1 .tgz)"
 if [ -f "$pkgname.tgz" ]; then
 	pkgfile="$pkgname.tgz"
