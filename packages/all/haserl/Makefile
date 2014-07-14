@@ -25,7 +25,10 @@ $(PKGBUILD): $(PKGPATH)/Makefile
 $(PKGPATH)/Makefile:
 	@$(MAKE) -C ../lua52
 	@$(MAKE) $(PKGPATH)
-	@cd $(PKGPATH) && ./configure --with-lua --host=$(TARGET)
+	@cd $(PKGPATH) && ./configure \
+		--prefix=/usr \
+		--host=$(TARGET) \
+		--with-lua
 
 $(PKGNAME).d: $(PKGBUILD)
 	@$(RM) -r $@
