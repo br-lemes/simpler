@@ -41,10 +41,12 @@ if [ -f "$LRPKG/$pkgname.list" ]; then
 	exit 1
 fi
 
-if [ "$(stat -c %s $pkgfile)" -gt "$PKGMAXSIZE" ]; then
-	umt_boot
-	echo "Package '$pkgname' exceeds the maximum allowed file size." >&2
-	exit 1
+if [ "$pkgname" != "modules" -o ! -f /etc/config/modules.cfg ]; then
+	if [ "$(stat -c %s $pkgfile)" -gt "$PKGMAXSIZE" ]; then
+		umt_boot
+		echo "Package '$pkgname' exceeds the maximum allowed file size." >&2
+		exit 1
+	fi
 fi
 
 case "$PKGMODE" in
@@ -81,7 +83,13 @@ if [ "$SCRIPT" = "pkg-load" ]; then
 		fi
 	done
 fi
-tar xzf "$pkgfile" -C /
+
+if [ "$pkgname" = "modules" ]; then
+	tar xzf "$pkgfile" -C / -T /etc/config/modules.cfg \
+		var/lib/lrpkg/modules.info var/lib/lrpkg/modules.list
+else
+	tar xzf "$pkgfile" -C /
+fi
 
 if [ "$SCRIPT" = "pkg-load" -a -x "/etc/rc.d/pkgs/rc.$pkgname" ]; then
 	"/etc/rc.d/pkgs/rc.$pkgname" start
