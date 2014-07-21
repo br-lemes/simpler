@@ -85,8 +85,12 @@ if [ "$SCRIPT" = "pkg-load" ]; then
 fi
 
 if [ "$pkgname" = "modules" ]; then
+	sed -i "" -e "s:/[0-9.+]*/:/$(uname -r)/:" /etc/config/modules.cfg
 	tar xzf "$pkgfile" -C / -T /etc/config/modules.cfg \
 		var/lib/lrpkg/modules.info var/lib/lrpkg/modules.list
+	grep '\.ko$' /etc/config/modules.cfg | while read line; do
+		modprobe "$(basename "$line" .ko)"
+	done
 else
 	tar xzf "$pkgfile" -C /
 fi
