@@ -23,12 +23,6 @@ LRPKG=/var/lib/lrpkg
 LRPKG_CACHE=/var/cache/lrpkg
 DESCRIPTION="$(head -3 "$0" | tail -1 | sed -e 's/^# //')"
 
-case "$PKGMODE" in
-	[Ww]|[Ww][Hh][Ii][Tt][Ee]) PKGMODE=WHITE;;
-	[Bb]|[Bb][Ll][Aa][Cc][Kk]) PKGMODE=BLACK;;
-	*) PKGMODE=NO
-esac
-
 grep -q /boot /proc/mounts
 BOOT="$?"
 

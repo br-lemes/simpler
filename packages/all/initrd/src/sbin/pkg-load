@@ -50,6 +50,12 @@ if [ "$pkgname" != "modules" -o ! -f /etc/config/modules.cfg ]; then
 fi
 
 case "$PKGMODE" in
+	[Ww]|[Ww][Hh][Ii][Tt][Ee]) PKGMODE=WHITE;;
+	[Bb]|[Bb][Ll][Aa][Cc][Kk]) PKGMODE=BLACK;;
+	*) PKGMODE=NO
+esac
+
+case "$PKGMODE" in
 	WHITE)
 		if ! echo " $PKGLIST" | tr "\n\t" " " | grep -q " $pkgname "; then
 			umt_boot
