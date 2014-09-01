@@ -53,11 +53,13 @@ while read DEV MP TYPE || [ -n "$MP" ]; do
 	fi
 done < /etc/fstab
 
-# /home and /opt may be a mount point, a symbolic link or
+# /home, /opt and /var/cache/lrpkg may be a mount point, a symbolic link or
 # create an empty directory
 [ ! -d /home -a -n "$HOME_SYMLINK" ]  && ln -s "$HOME_SYMLINK" /home
 [ ! -d /opt -a -n "$OPT_SYMLINK" ] && ln -s "$OPT_SYMLINK" /opt
-mkdir -p /home /opt
+[ ! -d "$LRPKG_CACHE" -a -n "$LRPKG_CACHE_SYMLINK" ] &&
+	ln -s "$LRPKG_CACHE_SYMLINK" "$LRPKG_CACHE"
+mkdir -p /home /opt "$LRPKG_CACHE"
 
 waitandmount() {
 	# waits for usb before mounting, maybe sda, sdb, etc.
